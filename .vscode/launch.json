@@ -1,0 +1,60 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "🌐 פיתוח על Chrome - Debug Console",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": [
+        "-d",
+        "chrome",
+        "--web-port=8080"
+      ],
+      "args": ["--dart-define=ENV=local"],
+      "console": "debugConsole"
+    },
+    {
+      "name": "📋 פיתוח על Chrome - Terminal (ניתן להעתיק)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": [
+        "-d",
+        "chrome",
+        "--web-port=8080"
+      ],
+      "args": ["--dart-define=ENV=local"],
+      "console": "terminal"
+    },
+    {
+      "name": "🔌 התחבר לדיבאגר (הזן URL)",
+      "request": "attach",
+      "type": "dart",
+      "vmServiceUri": "${command:dart.promptForVmService}"
+    },
+    {
+      "name": "🌐 בדיקות בענן",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--dart-define=ENV=testing"],
+      "console": "debugConsole"
+    },
+    {
+      "name": "🚀 ייצור",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--dart-define=ENV=production"],
+      "console": "debugConsole"
+    },
+    {
+      "name": "🧪 בדיקות יחידה",
+      "request": "launch",
+      "type": "dart",
+      "program": "test/",
+      "args": ["--dart-define=ENV=local"]
+    }
+  ]
+}
