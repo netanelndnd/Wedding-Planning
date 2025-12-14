@@ -1,0 +1,65 @@
+import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+
+/**
+ * useLoginForm Hook
+ * ----------------
+ * Handles login form logic with performance optimizations:
+ * - Dynamic imports for Firebase (code splitting)
+ * - useCallback for memoized functions
+ */
+export function useLoginForm() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { isMockMode, mockLogin } = useAuth();
+
+  // Memoize the login handler to prevent unnecessary re-creation
+  const handleLogin = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    if (isMockMode && mockLogin) {
+      // Simulate network delay
+      setTimeout(() => {
+        mockLogin();
+      }, 1000);
+      return;
+    }
+
+    try {
+      // Dynamic import - loads Firebase only when needed (Code Splitting)
+      const [{ signInWithEmailAndPassword }, { auth }] = await Promise.all([
+        import('firebase/auth'),
+        import('@/lib/firebase')
+      ]);
+      
+      // Sign in directly on the client side
+      await signInWithEmailAndPassword(auth, email, password);
+      
+      // Navigate to dashboard
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 500);
+    } catch (err: any) {
+      setError(err.message || 'שגיאה בהתחברות');
+      setLoading(false);
+    }
+  }, [email, password, isMockMode, mockLogin, router]);
+
+  return {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    error,
+    loading,
+    handleLogin,
+    isMockMode,
+  };
+}
+

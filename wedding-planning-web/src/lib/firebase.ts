@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, setPersistence, browserLocalPersistence, Auth } from 'firebase/auth';
-import { getFirestore, Firestore } from 'firebase/firestore';
+import { getFirestore, Firestore, enableNetwork, disableNetwork } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 import { getMessaging, isSupported } from 'firebase/messaging';
 
@@ -39,6 +39,11 @@ if (!isMockMode) {
     
     // Initialize Firestore
     db = getFirestore(app);
+    
+    // Force Firestore to be online (disable offline persistence issues)
+    enableNetwork(db).catch((err) => {
+      console.warn('Could not enable Firestore network:', err);
+    });
     
     // Initialize Firebase Storage
     storage = getStorage(app);

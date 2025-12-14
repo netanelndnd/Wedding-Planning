@@ -94,6 +94,31 @@ export function useAuth() {
     window.location.href = '/login';
   };
 
+  // Logout Function (handles both Firebase and Mock modes)
+  const logout = async () => {
+    try {
+      if (isMockMode) {
+        mockLogout();
+        return;
+      }
+
+      // Firebase logout
+      if (auth) {
+        const { signOut } = await import('firebase/auth');
+        await signOut(auth);
+      }
+      
+      // Clear state
+      setUser(null);
+      setCoupleData(null);
+      
+      // Redirect to login
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
   // Debug logging
   useEffect(() => {
     console.log('useAuth state:', { 
@@ -113,6 +138,7 @@ export function useAuth() {
     isAuthenticated: !!user,
     mockLogin: isMockMode ? mockLogin : undefined,
     mockLogout: isMockMode ? mockLogout : undefined,
+    logout, // Universal logout function
     isMockMode,
   };
 }
