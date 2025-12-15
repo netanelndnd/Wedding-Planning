@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useCallback, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
 /**
@@ -8,14 +8,26 @@ import { useAuth } from '@/hooks/useAuth';
  * Handles login form logic with performance optimizations:
  * - Dynamic imports for Firebase (code splitting)
  * - useCallback for memoized functions
+ * - Success message after registration
  */
 export function useLoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isMockMode, mockLogin } = useAuth();
+
+  // Check if user just registered
+  useEffect(() => {
+    if (searchParams.get('registered') === 'true') {
+      setSuccessMessage('ההרשמה הושלמה בהצלחה! 🎉 כעת תוכל להתחבר עם המייל והסיסמה שלך');
+      // Clear the URL parameter
+      window.history.replaceState({}, '', '/login');
+    }
+  }, [searchParams]);
 
   // Memoize the login handler to prevent unnecessary re-creation
   const handleLogin = useCallback(async (e: React.FormEvent) => {
@@ -58,6 +70,7 @@ export function useLoginForm() {
     setPassword,
     error,
     loading,
+    successMessage,
     handleLogin,
     isMockMode,
   };

@@ -11,6 +11,7 @@ export default function LoginPage() {
     setPassword,
     error,
     loading,
+    successMessage,
     handleLogin,
     isMockMode,
   } = useLoginForm();
@@ -31,6 +32,18 @@ export default function LoginPage() {
           </h1>
           <p className="text-gray-600">כניסה לחשבון</p>
         </div>
+
+        {successMessage && (
+          <div className="p-4 mb-6 bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-xl text-green-700 text-sm animate-fadeIn shadow-sm">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">✅</span>
+              <div>
+                <strong className="font-semibold">הצלחה!</strong>
+                <p className="mt-1">{successMessage}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {isMockMode && (
           <div className="p-4 mb-6 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl text-yellow-800 text-sm animate-fadeIn shadow-sm">

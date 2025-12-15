@@ -18,6 +18,7 @@ interface SignupFormData {
  * - Dynamic imports for Firebase
  * - useCallback for memoized functions
  * - Parallel imports with Promise.all
+ * - After successful registration, redirects to login page
  */
 export function useSignupForm() {
   const [formData, setFormData] = useState<SignupFormData>({
@@ -31,7 +32,7 @@ export function useSignupForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { isMockMode, mockLogin } = useAuth();
+  const { isMockMode } = useAuth();
 
   // Memoize handleChange to prevent unnecessary re-renders
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,9 +55,11 @@ export function useSignupForm() {
 
     setLoading(true);
 
-    if (isMockMode && mockLogin) {
+    if (isMockMode) {
+      // In Mock Mode, simulate registration and redirect to login
       setTimeout(() => {
-        mockLogin();
+        router.push('/login?registered=true');
+        setLoading(false);
       }, 1000);
       return;
     }
@@ -64,7 +67,7 @@ export function useSignupForm() {
     try {
       // Dynamic imports - parallel loading for better performance
       const [
-        { createUserWithEmailAndPassword },
+        { createUserWithEmailAndPassword, signOut },
         { setDoc, doc, Timestamp },
         { auth, db }
       ] = await Promise.all([
@@ -87,15 +90,19 @@ export function useSignupForm() {
         updatedAt: Timestamp.now(),
       });
 
+      // Sign out the user and redirect to login page
+      await signOut(auth);
+      
+      // Redirect to login with success message
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push('/login?registered=true');
       }, 500);
     } catch (err: any) {
       setError(err.message || 'שגיאה ברישום');
     } finally {
       setLoading(false);
     }
-  }, [formData, isMockMode, mockLogin, router]);
+  }, [formData, isMockMode, router]);
 
   return {
     formData,
