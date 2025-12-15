@@ -35,7 +35,7 @@ function DashboardPage() {
           <div className="flex justify-between items-center">
             <div className="animate-fadeIn">
               <h1 className="text-4xl font-bold text-white mb-2">
-                {couple ? `💑 ${couple.partner1Name} ו${couple.partner2Name}` : '💝 דשבורד'}
+                {couple ? `💍 החתונה של ${couple.partner1Name} ו${couple.partner2Name}` : '💝 דשבורד'}
               </h1>
               <p className="text-pink-100 text-lg flex items-center gap-2">
                 {daysUntilWedding > 0
@@ -127,6 +127,25 @@ function DashboardPage() {
               : `✨ ${completedCount} מתוך ${tasks.length} משימות הושלמו - כל הכבוד!`}
           </p>
         </div>
+
+        {/* Helper Banner - Show only if no tasks */}
+        {tasks.length === 0 && (
+          <div className="glass p-6 rounded-2xl shadow-modern mb-8 animate-fadeIn border-2 border-purple-300" style={{ animationDelay: '0.35s' }}>
+            <div className="flex items-center gap-4">
+              <div className="text-5xl">💡</div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">רוצה להתחיל מהר?</h3>
+                <p className="text-gray-600 mb-3">הוספנו עבורך רשימת משימות בסיסית לתכנון החתונה!</p>
+                <button
+                  onClick={() => navigateTo('/setup-tasks')}
+                  className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                >
+                  ✨ הוסף 6 משימות חשובות
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Modern Navigation Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

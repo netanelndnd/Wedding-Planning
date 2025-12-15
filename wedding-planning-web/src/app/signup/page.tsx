@@ -55,7 +55,7 @@ export default function SignupPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="partner1Name" className="block text-sm font-semibold text-gray-700 mb-2">
-                👰 בן/בת זוג 1
+                👰 שם הכלה 
               </label>
               <input
                 type="text"
@@ -70,7 +70,7 @@ export default function SignupPage() {
 
             <div>
               <label htmlFor="partner2Name" className="block text-sm font-semibold text-gray-700 mb-2">
-                🤵 בן/בת זוג 2
+                🤵 שם החתן 
               </label>
               <input
                 type="text"

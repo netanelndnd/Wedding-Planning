@@ -67,8 +67,8 @@ export function useSignupForm() {
     try {
       // Dynamic imports - parallel loading for better performance
       const [
-        { createUserWithEmailAndPassword, signOut },
-        { setDoc, doc, Timestamp },
+        { createUserWithEmailAndPassword },
+        { setDoc, doc, Timestamp, addDoc, collection },
         { auth, db }
       ] = await Promise.all([
         import('firebase/auth'),
@@ -76,9 +76,12 @@ export function useSignupForm() {
         import('@/lib/firebase')
       ]);
       
+      console.log('Starting user creation...');
+      
       // Create user
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
+      console.log('User created:', user.uid);
 
       // Create couple document
       await setDoc(doc(db, 'couples', user.uid), {
@@ -89,17 +92,103 @@ export function useSignupForm() {
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       });
-
-      // Sign out the user and redirect to login page
-      await signOut(auth);
       
-      // Redirect to login with success message
+      console.log('✅ Couple document created successfully!');
+      
+      // Create default Epic for tasks
+      console.log('Creating default epic...');
+      
+      const epicRef = await addDoc(collection(db, 'epics'), {
+        title: 'משימות כלליות',
+        description: 'משימות חשובות לתכנון החתונה',
+        coupleId: user.uid,
+        category: 'general',
+        color: '#ec4899',
+        order: 0,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      });
+      
+      console.log('✅ Default Epic created!');
+      
+      // Create default tasks
+      const defaultTasks = [
+        {
+          title: '🏛️ הזמנת אולם',
+          description: 'לבחור ולהזמין אולם לחתונה',
+          priority: 'high',
+          category: 'venue',
+        },
+        {
+          title: '📸 שכירת צלם',
+          description: 'לבחור צלם מקצועי לחתונה',
+          priority: 'high',
+          category: 'photography',
+        },
+        {
+          title: '🎵 שכירת תקליטן או זמר',
+          description: 'לבחור תקליטן או זמר לחתונה',
+          priority: 'medium',
+          category: 'entertainment',
+        },
+        {
+          title: '🕍 תיאום עם רב',
+          description: 'לתאם פגישה עם רב לחתונה',
+          priority: 'high',
+          category: 'ceremony',
+        },
+        {
+          title: '👰 קניית שמלת כלה',
+          description: 'לבחור ולהזמין שמלת כלה',
+          priority: 'high',
+          category: 'attire',
+        },
+        {
+          title: '🤵 קניית חליפת חתן',
+          description: 'לבחור ולהזמין חליפה לחתן',
+          priority: 'medium',
+          category: 'attire',
+        },
+      ];
+      
+      // Add all default tasks
+      console.log(`Creating ${defaultTasks.length} default tasks...`);
+      
+      const taskPromises = defaultTasks.map((task, index) => {
+        console.log(`📝 Creating task ${index + 1}/${defaultTasks.length}: ${task.title}`);
+        return addDoc(collection(db, 'tasks'), {
+          ...task,
+          coupleId: user.uid,
+          epicId: epicRef.id,
+          status: 'pending',
+          assignedTo: [],
+          subtasks: [],
+          order: index,
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
+        });
+      });
+      
+      console.log('⏳ Waiting for all tasks to be created...');
+      await Promise.all(taskPromises);
+      
+      console.log('✅ All default tasks created successfully!');
+      console.log('✅ Registration complete! User:', user.uid);
+      
+      // Success! Show a brief message then redirect to dashboard
+      setLoading(false);
+      
+      console.log('→ Redirecting to dashboard in 500ms...');
+      
+      // Small delay for UX, then navigate to dashboard
       setTimeout(() => {
-        router.push('/login?registered=true');
+        console.log('→ Navigating now...');
+        router.push('/dashboard');
       }, 500);
+      
     } catch (err: any) {
+      console.error('❌ Signup error:', err);
       setError(err.message || 'שגיאה ברישום');
-    } finally {
       setLoading(false);
     }
   }, [formData, isMockMode, router]);
