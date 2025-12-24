@@ -7,6 +7,8 @@
 1. **Firebase Authentication** - שמירת פרטי התחברות (email/password)
 2. **Firebase Firestore** - שמירת כל המידע של המשתמש (Database)
 
+הנתונים נשמרים ב-**Firestore** במבנה של Collections ו-Documents, המאפשר עדכונים בזמן אמת (real-time sync) ושאילתות מתקדמות.
+
 ---
 
 ## 🔐 Firebase Authentication
@@ -62,7 +64,10 @@ const user = userCredential.user; // user.uid הוא המזהה הייחודי
 
 **איפה זה נוצר?**
 ```typescript
-// בקובץ: src/hooks/useSignupForm.ts (שורה 87-94)
+// בקובץ: src/hooks/useSignupForm.ts
+import { setDoc, doc, Timestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
 await setDoc(doc(db, 'couples', user.uid), {
   id: user.uid,
   partner1Name: formData.partner1Name,
@@ -75,8 +80,14 @@ await setDoc(doc(db, 'couples', user.uid), {
 
 **איך זה נקרא?**
 ```typescript
-// בקובץ: src/hooks/useAuth.ts (שורה 60)
+// בקובץ: src/hooks/useAuth.ts
+import { getDoc, doc } from 'firebase/firestore';
+
 const coupleDoc = await getDoc(doc(db, 'couples', firebaseUser.uid));
+if (coupleDoc.exists()) {
+  const data = coupleDoc.data();
+  const weddingDate = data.weddingDate?.toDate();
+}
 ```
 
 ---
@@ -125,12 +136,17 @@ const coupleDoc = await getDoc(doc(db, 'couples', firebaseUser.uid));
 
 **איפה זה נוצר?**
 ```typescript
-// בקובץ: src/hooks/useSignupForm.ts (שורה 159-169)
-await addDoc(collection(db, 'tasks'), {
+// בקובץ: src/services/firestoreService.ts
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
+const tasksCollection = collection(db, 'tasks');
+const docRef = await addDoc(tasksCollection, {
   ...task,
   coupleId: user.uid,
-  epicId: epicRef.id,
+  epicId: epicId,
   status: 'pending',
+  dueDate: task.dueDate ? Timestamp.fromDate(task.dueDate) : null,
   createdAt: Timestamp.now(),
   updatedAt: Timestamp.now(),
 });
@@ -138,9 +154,22 @@ await addDoc(collection(db, 'tasks'), {
 
 **איך זה נקרא?**
 ```typescript
-// בקובץ: src/services/firestoreService.ts (שורה 118)
+// בקובץ: src/services/firestoreService.ts
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+
 const q = query(collection(db, 'tasks'), where('coupleId', '==', coupleId));
 return onSnapshot(q, (snapshot) => {
+  const tasks = snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      ...data,
+      id: doc.id,
+      dueDate: data.dueDate?.toDate?.() || data.dueDate,
+      completedAt: data.completedAt?.toDate?.() || data.completedAt,
+      createdAt: data.createdAt?.toDate?.() || data.createdAt,
+      updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+    };
+  });
   // Real-time updates!
 });
 ```
@@ -183,8 +212,11 @@ return onSnapshot(q, (snapshot) => {
 
 **איפה זה נוצר?**
 ```typescript
-// בקובץ: src/hooks/useSignupForm.ts (שורה 101-110)
-const epicRef = await addDoc(collection(db, 'epics'), {
+// בקובץ: src/services/firestoreService.ts
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+
+const epicsCollection = collection(db, 'epics');
+const docRef = await addDoc(epicsCollection, {
   title: 'משימות כלליות',
   coupleId: user.uid,
   category: 'general',
@@ -221,8 +253,11 @@ const epicRef = await addDoc(collection(db, 'epics'), {
 
 **איפה זה נשמר?**
 ```typescript
-// בקובץ: src/services/firestoreService.ts (שורה 260-269)
-await addDoc(collection(db, 'guests'), {
+// בקובץ: src/services/firestoreService.ts
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+
+const guestsCollection = collection(db, 'guests');
+const docRef = await addDoc(guestsCollection, {
   ...guest,
   coupleId,
   createdAt: Timestamp.now(),
@@ -283,6 +318,8 @@ User (Firebase Auth)
           └── coupleId: "abc123xyz"
 ```
 
+**הערה:** כל המסמכים מקושרים דרך `coupleId` = `user.uid`, מה שמאפשר שאילתות מהירות וקלות לנתונים של כל משתמש.
+
 ---
 
 ## 🔒 אבטחה - Firestore Security Rules
@@ -320,6 +357,7 @@ service cloud.firestore {
 ```typescript
 // קריאה בזמן אמת (Real-time)
 import { onSnapshot, collection, query, where } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const q = query(collection(db, 'tasks'), where('coupleId', '==', userId));
 onSnapshot(q, (snapshot) => {
@@ -339,15 +377,22 @@ onSnapshot(q, (snapshot) => {
 const user = await createUserWithEmailAndPassword(auth, email, password);
 
 // 2. יצירת מסמך couples
+import { setDoc, doc, Timestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
 await setDoc(doc(db, 'couples', user.uid), {
   partner1Name: 'ישראל',
   partner2Name: 'ישראלה',
-  // ...
+  weddingDate: Timestamp.fromDate(new Date('2025-10-10')),
+  createdAt: Timestamp.now(),
+  updatedAt: Timestamp.now(),
 });
 ```
 
 ### עדכון מידע
 ```typescript
+import { updateDoc, doc, Timestamp } from 'firebase/firestore';
+
 await updateDoc(doc(db, 'couples', userId), {
   partner1Name: 'ישראל חדש',
   updatedAt: Timestamp.now(),
@@ -356,15 +401,38 @@ await updateDoc(doc(db, 'couples', userId), {
 
 ### מחיקת מידע
 ```typescript
+import { deleteDoc, doc } from 'firebase/firestore';
+
 await deleteDoc(doc(db, 'tasks', taskId));
 ```
 
 ### קריאת מידע
 ```typescript
+import { getDoc, doc } from 'firebase/firestore';
+
 const docSnap = await getDoc(doc(db, 'couples', userId));
 if (docSnap.exists()) {
-  console.log(docSnap.data());
+  const data = docSnap.data();
+  console.log(data);
+  const weddingDate = data.weddingDate?.toDate();
 }
+```
+
+### הוספת משימה חדשה
+```typescript
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+
+const tasksCollection = collection(db, 'tasks');
+const docRef = await addDoc(tasksCollection, {
+  coupleId: userId,
+  epicId: 'epic-123',
+  title: 'הזמנת אולם',
+  status: 'pending',
+  priority: 'high',
+  createdAt: Timestamp.now(),
+  updatedAt: Timestamp.now(),
+});
+const taskId = docRef.id;
 ```
 
 ---
@@ -388,7 +456,11 @@ if (docSnap.exists()) {
 - `src/hooks/useSignupForm.ts` - יצירת משתמש ונתונים ראשוניים
 - `src/hooks/useAuth.ts` - קריאת נתוני הזוג
 - `src/services/firestoreService.ts` - כל הפעולות על Firestore
-- `src/lib/firebase.ts` - הגדרות Firebase
+  - `taskService` - ניהול משימות
+  - `epicService` - ניהול קבוצות משימות
+  - `guestService` - ניהול אורחים
+  - `vendorService` - ניהול ספקים
+- `src/lib/firebase.ts` - הגדרות Firebase (כולל אתחול Firestore)
 
 ---
 

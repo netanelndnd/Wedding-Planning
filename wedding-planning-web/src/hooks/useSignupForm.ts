@@ -68,7 +68,7 @@ export function useSignupForm() {
       // Dynamic imports - parallel loading for better performance
       const [
         { createUserWithEmailAndPassword },
-        { setDoc, doc, Timestamp, addDoc, collection },
+        { setDoc, doc, Timestamp, addDoc, collection, getDoc },
         { auth, db }
       ] = await Promise.all([
         import('firebase/auth'),
@@ -84,16 +84,40 @@ export function useSignupForm() {
       console.log('User created:', user.uid);
 
       // Create couple document
-      await setDoc(doc(db, 'couples', user.uid), {
+      const coupleData = {
         id: user.uid,
         partner1Name: formData.partner1Name,
         partner2Name: formData.partner2Name,
         weddingDate: formData.weddingDate ? Timestamp.fromDate(new Date(formData.weddingDate)) : null,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
+      };
+      
+      console.log('💾 Saving couple data to Firestore...', {
+        userId: user.uid,
+        partner1Name: coupleData.partner1Name,
+        partner2Name: coupleData.partner2Name,
+        hasWeddingDate: !!coupleData.weddingDate,
       });
       
-      console.log('✅ Couple document created successfully!');
+      const coupleRef = doc(db, 'couples', user.uid);
+      await setDoc(coupleRef, coupleData);
+      
+      console.log('✅ Couple document saved to Firestore!');
+      
+      // Immediately verify the data was saved
+      const verifyDoc = await getDoc(coupleRef);
+      if (verifyDoc.exists()) {
+        const savedData = verifyDoc.data();
+        console.log('✅ Couple data verified immediately after save:', {
+          partner1Name: savedData.partner1Name,
+          partner2Name: savedData.partner2Name,
+          weddingDate: savedData.weddingDate,
+        });
+      } else {
+        console.error('❌ ERROR: Couple data was not found immediately after save!');
+        throw new Error('שגיאה בשמירת נתוני הזוג - הנתונים לא נמצאו לאחר השמירה');
+      }
       
       // Create default Epic for tasks
       console.log('Creating default epic...');
@@ -175,15 +199,36 @@ export function useSignupForm() {
       console.log('✅ All default tasks created successfully!');
       console.log('✅ Registration complete! User:', user.uid);
       
-      // Success! Show a brief message then redirect to dashboard
+      // Verify that couple data was saved by reading it back
+      console.log('🔍 Verifying couple data was saved...');
+      const coupleDoc = await getDoc(doc(db, 'couples', user.uid));
+      if (coupleDoc.exists()) {
+        const savedData = coupleDoc.data();
+        console.log('✅ Couple data verified:', {
+          partner1Name: savedData.partner1Name,
+          partner2Name: savedData.partner2Name,
+          weddingDate: savedData.weddingDate,
+        });
+      } else {
+        console.error('❌ ERROR: Couple data was not saved!');
+        throw new Error('שגיאה בשמירת נתוני הזוג');
+      }
+      
+      // Success! Sign out the user and redirect to login page
       setLoading(false);
       
-      console.log('→ Redirecting to dashboard in 500ms...');
+      console.log('→ Signing out and redirecting to login page...');
       
-      // Small delay for UX, then navigate to dashboard
+      // Sign out the user so they need to log in
+      const { signOut } = await import('firebase/auth');
+      await signOut(auth);
+      
+      console.log('✅ User signed out successfully');
+      
+      // Small delay for UX, then navigate to login page with success message
       setTimeout(() => {
-        console.log('→ Navigating now...');
-        router.push('/dashboard');
+        console.log('→ Navigating to login page...');
+        router.push('/login?registered=true');
       }, 500);
       
     } catch (err: any) {

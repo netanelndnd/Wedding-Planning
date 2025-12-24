@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db, isMockMode } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { Couple } from '@/types';
 
 // Mock User for testing
@@ -30,6 +30,13 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('🔄 useAuth effect triggered', {
+      hasAuth: !!auth,
+      isMockMode,
+      firebaseLoading,
+      firebaseUser: firebaseUser ? 'exists' : 'null',
+    });
+
     if (!auth || isMockMode) {
       // Mock Mode
       const storedUser = localStorage.getItem('mockUser');
@@ -43,39 +50,113 @@ export function useAuth() {
 
     // Firebase Mode
     if (firebaseLoading) {
+      console.log('⏳ Waiting for auth to load...');
       setLoading(true);
       return;
     }
     
+    console.log('👤 Auth loaded, user:', firebaseUser ? 'exists' : 'null');
     setUser(firebaseUser);
     
-    if (!firebaseUser) {
+    // Type guard to check if firebaseUser is a User object
+    if (!firebaseUser || typeof firebaseUser !== 'object' || !('uid' in firebaseUser)) {
+      console.log('⚠️ No valid user found, clearing couple data');
       setCoupleData(null);
       setLoading(false);
       return;
     }
 
-    const fetchCoupleData = async () => {
-      try {
-        const coupleDoc = await getDoc(doc(db, 'couples', firebaseUser.uid));
+    // Subscribe to couple data for real-time updates
+    // At this point, firebaseUser is guaranteed to be a User object
+    const userId = firebaseUser.uid;
+    console.log('🔍 Setting up couple data subscription for user:', userId);
+    const coupleRef = doc(db, 'couples', userId);
+    
+    // First, try to get the data immediately (one-time read)
+    // This ensures we have the data even if onSnapshot hasn't fired yet
+    getDoc(coupleRef)
+      .then((coupleDoc) => {
         if (coupleDoc.exists()) {
           const data = coupleDoc.data();
-          setCoupleData({
+          console.log('📖 Initial couple data read (immediate):', {
+            partner1Name: data.partner1Name,
+            partner2Name: data.partner2Name,
+            hasWeddingDate: !!data.weddingDate,
+          });
+          
+          // Set the data immediately so it's available right away
+          const coupleData: Couple = {
             ...data,
-            id: firebaseUser.uid,
+            id: userId,
             weddingDate: data.weddingDate?.toDate?.() || data.weddingDate,
             createdAt: data.createdAt?.toDate?.() || data.createdAt,
             updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
-          } as Couple);
+          } as Couple;
+          
+          setCoupleData(coupleData);
+          setLoading(false);
+        } else {
+          console.warn('⚠️ No couple data found on initial read for user:', userId);
+          setCoupleData(null);
+          setLoading(false);
         }
-      } catch (err) {
-        console.error('Error fetching couple data:', err);
-      } finally {
+      })
+      .catch((err) => {
+        console.error('❌ Error in initial couple data read:', err);
+        setCoupleData(null);
         setLoading(false);
+      });
+    
+    // Use onSnapshot for real-time updates
+    // This will keep the data in sync if it changes
+    const unsubscribe = onSnapshot(
+      coupleRef,
+      (coupleDoc) => {
+        console.log('📡 Couple data snapshot received (real-time update), exists:', coupleDoc.exists());
+        if (coupleDoc.exists()) {
+          const data = coupleDoc.data();
+          console.log('📋 Raw couple data from Firestore (snapshot):', data);
+          
+          const coupleData: Couple = {
+            ...data,
+            id: userId,
+            weddingDate: data.weddingDate?.toDate?.() || data.weddingDate,
+            createdAt: data.createdAt?.toDate?.() || data.createdAt,
+            updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+          } as Couple;
+          
+          console.log('✅ Couple data updated from snapshot:', {
+            id: coupleData.id,
+            partner1Name: coupleData.partner1Name,
+            partner2Name: coupleData.partner2Name,
+            weddingDate: coupleData.weddingDate,
+          });
+          
+          // Update the data (this will trigger a re-render if data changed)
+          setCoupleData(coupleData);
+        } else {
+          console.warn('⚠️ No couple data found in snapshot for user:', userId);
+          setCoupleData(null);
+        }
+        // Don't set loading to false here - it's already set by getDoc
+        // This is just for real-time updates
+      },
+      (err) => {
+        console.error('❌ Error in couple data subscription:', err);
+        console.error('Error details:', {
+          code: err.code,
+          message: err.message,
+          stack: err.stack,
+        });
+        // Only clear data if we don't already have it from getDoc
+        // Don't set loading to false here - it's already set by getDoc
       }
-    };
+    );
 
-    fetchCoupleData();
+    // Cleanup subscription on unmount or user change
+    return () => {
+      unsubscribe();
+    };
   }, [firebaseUser, firebaseLoading]);
 
   // Mock Login Function
@@ -121,14 +202,19 @@ export function useAuth() {
 
   // Debug logging
   useEffect(() => {
+    const firebaseUserId = firebaseUser && typeof firebaseUser === 'object' && 'uid' in firebaseUser 
+      ? (firebaseUser as { uid: string }).uid 
+      : null;
+    
     console.log('useAuth state:', { 
       user: user?.uid, 
       loading, 
       isAuthenticated: !!user,
       isMockMode,
-      firebaseUser: firebaseUser?.uid 
+      firebaseUser: firebaseUserId,
+      couple: couple ? `${couple.partner1Name} & ${couple.partner2Name}` : null,
     });
-  }, [user, loading, firebaseUser]);
+  }, [user, loading, firebaseUser, couple, isMockMode]);
 
   return {
     user,

@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { epicService, taskService } from '@/services/firestoreService';
+import { isMockMode } from '@/lib/firebase';
+import type { Priority } from '@/types';
 
 /**
  * Setup Tasks Page
@@ -15,100 +18,157 @@ export default function SetupTasksPage() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const isOperationActiveRef = useRef(false);
 
   const handleSetupTasks = async () => {
+    // Validation checks
     if (!user) {
       setError('אינך מחובר');
       return;
     }
 
+    if (!user.uid) {
+      setError('שגיאה: אין מזהה משתמש תקין');
+      console.error('User object missing uid:', user);
+      return;
+    }
+
     setLoading(true);
     setError('');
+    isOperationActiveRef.current = true;
+
+    // Timeout mechanism - 30 seconds
+    const timeoutId = setTimeout(() => {
+      if (isOperationActiveRef.current) {
+        isOperationActiveRef.current = false;
+        setError('הפעולה לוקחת יותר מדי זמן. אנא נסה שוב או בדוק את החיבור לאינטרנט.');
+        setLoading(false);
+        console.error('Timeout: Task creation took longer than 30 seconds');
+      }
+    }, 30000);
 
     try {
-      const [
-        { addDoc, collection, Timestamp },
-        { db }
-      ] = await Promise.all([
-        import('firebase/firestore'),
-        import('@/lib/firebase')
-      ]);
-
       console.log('Starting tasks setup for user:', user.uid);
+      console.log('Mock mode:', isMockMode);
 
-      // Create default Epic
-      const epicRef = await addDoc(collection(db, 'epics'), {
-        title: 'משימות כלליות',
-        description: 'משימות חשובות לתכנון החתונה',
-        coupleId: user.uid,
-        category: 'general',
-        color: '#ec4899',
-        order: 0,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-      });
+      // Step 1: Create default Epic
+      let epicId: string;
+      try {
+        console.log('Creating default epic...');
+        epicId = await epicService.addEpic(user.uid, {
+          title: 'משימות כלליות',
+          description: 'משימות חשובות לתכנון החתונה',
+          category: 'general',
+          color: '#ec4899',
+          order: 0,
+        });
+        console.log('✅ Epic created:', epicId);
+      } catch (epicErr: any) {
+        console.error('Error creating epic:', epicErr);
+        isOperationActiveRef.current = false;
+        clearTimeout(timeoutId);
+        setError(`שגיאה ביצירת הנושא: ${epicErr.message || 'שגיאה לא ידועה'}`);
+        setLoading(false);
+        return;
+      }
 
-      console.log('✅ Epic created:', epicRef.id);
-
-      // Create default tasks
-      const defaultTasks = [
+      // Step 2: Create default tasks
+      const defaultTasks: Array<{
+        title: string;
+        description: string;
+        priority: Priority;
+        category: string;
+        epicId: string;
+        status: 'pending';
+        coupleId: string;
+      }> = [
         {
           title: '🏛️ הזמנת אולם',
           description: 'לבחור ולהזמין אולם לחתונה',
-          priority: 'high' as const,
+          priority: 'high',
           category: 'venue',
+          epicId,
+          status: 'pending',
+          coupleId: user.uid,
         },
         {
           title: '📸 שכירת צלם',
           description: 'לבחור צלם מקצועי לחתונה',
-          priority: 'high' as const,
+          priority: 'high',
           category: 'photography',
+          epicId,
+          status: 'pending',
+          coupleId: user.uid,
         },
         {
           title: '🎵 שכירת תקליטן או זמר',
           description: 'לבחור תקליטן או זמר לחתונה',
-          priority: 'medium' as const,
+          priority: 'medium',
           category: 'entertainment',
+          epicId,
+          status: 'pending',
+          coupleId: user.uid,
         },
         {
           title: '🕍 תיאום עם רב',
           description: 'לתאם פגישה עם רב לחתונה',
-          priority: 'high' as const,
+          priority: 'high',
           category: 'ceremony',
+          epicId,
+          status: 'pending',
+          coupleId: user.uid,
         },
         {
           title: '👰 קניית שמלת כלה',
           description: 'לבחור ולהזמין שמלת כלה',
-          priority: 'high' as const,
+          priority: 'high',
           category: 'attire',
+          epicId,
+          status: 'pending',
+          coupleId: user.uid,
         },
         {
           title: '🤵 קניית חליפת חתן',
           description: 'לבחור ולהזמין חליפה לחתן',
-          priority: 'medium' as const,
+          priority: 'medium',
           category: 'attire',
+          epicId,
+          status: 'pending',
+          coupleId: user.uid,
         },
       ];
 
-      // Add all tasks
-      const taskPromises = defaultTasks.map((task) =>
-        addDoc(collection(db, 'tasks'), {
-          ...task,
-          coupleId: user.uid,
-          epicId: epicRef.id,
-          status: 'pending',
-          assignedTo: [],
-          subtasks: [],
-          order: 0,
-          createdAt: Timestamp.now(),
-          updatedAt: Timestamp.now(),
-        })
-      );
+      // Add all tasks with individual error handling
+      console.log(`Creating ${defaultTasks.length} default tasks...`);
+      const taskPromises = defaultTasks.map(async (task, index) => {
+        try {
+          console.log(`Creating task ${index + 1}/${defaultTasks.length}: ${task.title}`);
+          const taskId = await taskService.addTask(user.uid, task);
+          console.log(`✅ Task ${index + 1} created: ${taskId}`);
+          return taskId;
+        } catch (taskErr: any) {
+          console.error(`Error creating task ${index + 1} (${task.title}):`, taskErr);
+          throw new Error(`שגיאה ביצירת המשימה "${task.title}": ${taskErr.message || 'שגיאה לא ידועה'}`);
+        }
+      });
 
-      await Promise.all(taskPromises);
+      try {
+        await Promise.all(taskPromises);
+        console.log('✅ All tasks created successfully!');
+      } catch (tasksErr: any) {
+        console.error('Error creating some tasks:', tasksErr);
+        isOperationActiveRef.current = false;
+        clearTimeout(timeoutId);
+        setError(tasksErr.message || 'שגיאה ביצירת חלק מהמשימות');
+        setLoading(false);
+        return;
+      }
 
-      console.log('✅ All tasks created!');
+      // Clear timeout on success
+      isOperationActiveRef.current = false;
+      clearTimeout(timeoutId);
       setSuccess(true);
+      setLoading(false);
 
       // Redirect to tasks page after 2 seconds
       setTimeout(() => {
@@ -116,9 +176,10 @@ export default function SetupTasksPage() {
       }, 2000);
 
     } catch (err: any) {
-      console.error('Error creating tasks:', err);
-      setError(err.message || 'שגיאה ביצירת המשימות');
-    } finally {
+      console.error('Unexpected error creating tasks:', err);
+      isOperationActiveRef.current = false;
+      clearTimeout(timeoutId);
+      setError(err.message || 'שגיאה ביצירת המשימות. אנא נסה שוב.');
       setLoading(false);
     }
   };

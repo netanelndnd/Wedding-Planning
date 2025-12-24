@@ -39,10 +39,22 @@ if (!isMockMode) {
     
     // Initialize Firebase Authentication
     auth = getAuth(app);
-    setPersistence(auth, browserLocalPersistence);
+    // Set persistence to keep user logged in after page refresh
+    // Note: setPersistence must be called before any other auth operations
+    // We use .then() instead of await since this is top-level code
+    setPersistence(auth, browserLocalPersistence)
+      .then(() => {
+        console.log('✅ Auth persistence set to browserLocalPersistence');
+      })
+      .catch((err) => {
+        console.warn('⚠️ Could not set auth persistence:', err);
+      });
     
-    // Initialize Firestore (optional - can be removed if only using Realtime Database)
-    db = getFirestore(app);
+    // Initialize Firestore with specific database name
+    // The database name is 'weddingdatabase123' as configured in Firebase Console
+    const DATABASE_NAME = 'weddingdatabase123';
+    db = getFirestore(app, DATABASE_NAME);
+    console.log('✅ Firestore initialized with database:', DATABASE_NAME);
     
     // Force Firestore to be online (disable offline persistence issues)
     enableNetwork(db).catch((err) => {
