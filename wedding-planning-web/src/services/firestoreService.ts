@@ -19,7 +19,7 @@ let mockTasks: Task[] = [
   {
     id: 'task-1',
     coupleId: 'mock-user-123',
-    epicId: 'epic-1',
+    epicId: 'epic-1111',
     title: 'לבחור אולם',
     category: 'venue',
     priority: 'high',
@@ -285,7 +285,7 @@ export const guestService = {
           updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
         } as Guest;
 
-        //כככ
+        
       });
       callback(guests);
     });
