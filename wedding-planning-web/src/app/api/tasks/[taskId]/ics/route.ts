@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { doc, getDoc } from 'firebase/firestore';
+import { db, isMockMode } from '@/lib/firebase';
 
 /**
  * Generate .ICS file for a task
  * GET /api/tasks/[taskId]/ics
+ * 
+ * Accepts optional query params for title, description, dueDate
+ * If not provided, fetches from Firestore
  */
 export async function GET(
   req: NextRequest,
@@ -10,18 +15,39 @@ export async function GET(
 ) {
   try {
     const { taskId } = params;
-
-    // Get task data (we'll need to fetch it from Firestore)
-    // For now, we'll create a helper function to generate ICS content
-    // In a real implementation, you'd fetch the task from Firestore
-    
-    // Since we can't easily access Firestore here without the coupleId,
-    // we'll accept task data as query parameters or create a service method
-    
     const searchParams = req.nextUrl.searchParams;
-    const title = searchParams.get('title') || 'משימה';
-    const description = searchParams.get('description') || '';
-    const dueDate = searchParams.get('dueDate');
+    
+    let title = searchParams.get('title') || 'משימה';
+    let description = searchParams.get('description') || '';
+    let dueDate: Date | null = null;
+
+    // Try to get dueDate from query params first (for shorter URLs)
+    const dueDateParam = searchParams.get('dueDate');
+    if (dueDateParam) {
+      dueDate = new Date(dueDateParam);
+    } else {
+      // If not in params, try to fetch from Firestore
+      try {
+        if (!isMockMode) {
+          const taskDoc = await getDoc(doc(db, 'tasks', taskId));
+          if (taskDoc.exists()) {
+            const taskData = taskDoc.data();
+            if (!title || title === 'משימה') {
+              title = taskData.title || title;
+            }
+            if (!description && taskData.description) {
+              description = taskData.description;
+            }
+            if (!dueDate && taskData.dueDate) {
+              dueDate = taskData.dueDate?.toDate?.() || new Date(taskData.dueDate);
+            }
+          }
+        }
+      } catch (fetchError) {
+        console.warn('Could not fetch task from Firestore:', fetchError);
+        // Continue with query params only
+      }
+    }
     
     if (!dueDate) {
       return NextResponse.json(
@@ -34,7 +60,7 @@ export async function GET(
     const icsContent = generateICS({
       title,
       description,
-      dueDate: new Date(dueDate),
+      dueDate,
       uid: `task-${taskId}-${Date.now()}`,
     });
 

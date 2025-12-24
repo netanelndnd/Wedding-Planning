@@ -441,18 +441,45 @@ export default function TasksPage() {
                         }
                         
                         try {
-                          // Generate ICS file URL
+                          // Generate ICS file URL - only send dueDate to keep URL short
+                          // Title and description will be fetched from Firestore if needed
                           const baseUrl = window.location.origin;
                           const icsParams = new URLSearchParams({
-                            title: task.title,
-                            description: task.description || '',
                             dueDate: new Date(task.dueDate).toISOString(),
                           });
                           const icsUrl = `${baseUrl}/api/tasks/${task.id}/ics?${icsParams.toString()}`;
                           
-                          // Create WhatsApp message with ICS link
-                          const message = `📅 ${task.title}${task.description ? `\n${task.description}` : ''}\n\n📎 הוסף ליומן: ${icsUrl}`;
-                          const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                          // Create clean WhatsApp message
+                          const taskTitle = task.title.replace(/[📅📎]/g, '').trim(); // Remove emojis from title
+                          const dateStr = new Date(task.dueDate).toLocaleDateString('he-IL', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit'
+                          });
+                          
+                          // Build message parts
+                          let messageParts: string[] = [];
+                          messageParts.push(`📅 ${taskTitle}`);
+                          if (task.description) {
+                            messageParts.push(task.description);
+                          }
+                          messageParts.push(`תאריך: ${dateStr}`);
+                          messageParts.push('');
+                          messageParts.push(`📎 הוסף ליומן:`);
+                          messageParts.push(icsUrl);
+                          
+                          const message = messageParts.join('\n');
+                          
+                          // Safely encode the message
+                          let whatsappUrl: string;
+                          try {
+                            whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                          } catch (encodeError) {
+                            // Fallback: use a simpler message if encoding fails
+                            const simpleMessage = `📅 ${taskTitle}\nתאריך: ${dateStr}\n\n📎 הוסף ליומן:\n${icsUrl}`;
+                            whatsappUrl = `https://wa.me/?text=${encodeURIComponent(simpleMessage)}`;
+                          }
+                          
                           window.open(whatsappUrl, '_blank');
                         } catch (error) {
                           console.error('Error generating ICS:', error);
@@ -909,18 +936,45 @@ export default function TasksPage() {
                               }
                               
                               try {
-                                // Generate ICS file URL
+                                // Generate ICS file URL - only send dueDate to keep URL short
+                                // Title and description will be fetched from Firestore if needed
                                 const baseUrl = window.location.origin;
                                 const icsParams = new URLSearchParams({
-                                  title: task.title,
-                                  description: task.description || '',
                                   dueDate: new Date(task.dueDate).toISOString(),
                                 });
                                 const icsUrl = `${baseUrl}/api/tasks/${task.id}/ics?${icsParams.toString()}`;
                                 
-                                // Create WhatsApp message with ICS link
-                                const message = `📅 ${task.title}${task.description ? `\n${task.description}` : ''}\n\n📎 הוסף ליומן: ${icsUrl}`;
-                                const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                                // Create clean WhatsApp message
+                                const taskTitle = task.title.replace(/[📅📎]/g, '').trim(); // Remove emojis from title
+                                const dateStr = new Date(task.dueDate).toLocaleDateString('he-IL', {
+                                  year: 'numeric',
+                                  month: '2-digit',
+                                  day: '2-digit'
+                                });
+                                
+                                // Build message parts
+                                let messageParts: string[] = [];
+                                messageParts.push(`📅 ${taskTitle}`);
+                                if (task.description) {
+                                  messageParts.push(task.description);
+                                }
+                                messageParts.push(`תאריך: ${dateStr}`);
+                                messageParts.push('');
+                                messageParts.push(`📎 הוסף ליומן:`);
+                                messageParts.push(icsUrl);
+                                
+                                const message = messageParts.join('\n');
+                                
+                                // Safely encode the message
+                                let whatsappUrl: string;
+                                try {
+                                  whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                                } catch (encodeError) {
+                                  // Fallback: use a simpler message if encoding fails
+                                  const simpleMessage = `📅 ${taskTitle}\nתאריך: ${dateStr}\n\n📎 הוסף ליומן:\n${icsUrl}`;
+                                  whatsappUrl = `https://wa.me/?text=${encodeURIComponent(simpleMessage)}`;
+                                }
+                                
                                 window.open(whatsappUrl, '_blank');
                               } catch (error) {
                                 console.error('Error generating ICS:', error);
