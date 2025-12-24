@@ -4,6 +4,7 @@ import { useDashboard } from '@/hooks/useDashboard';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import StatsCards from '@/components/dashboard/StatsCards';
+import ExpensesCard from '@/components/dashboard/ExpensesCard';
 import ProgressBar from '@/components/dashboard/ProgressBar';
 import EmptyStateBanner from '@/components/dashboard/EmptyStateBanner';
 import NavigationCards from '@/components/dashboard/NavigationCards';
@@ -25,6 +26,7 @@ function DashboardPage() {
     daysUntilWedding,
     completedCount,
     pendingCount,
+    expenses,
     navigateTo,
     handleLogout,
   } = useDashboard();
@@ -47,6 +49,12 @@ function DashboardPage() {
           totalTasks={tasks.length}
           completedCount={completedCount}
           pendingCount={pendingCount}
+        />
+
+        <ExpensesCard
+          totalExpenses={expenses.total}
+          expensesByCategory={expenses.byCategory}
+          vendorCount={expenses.vendorCount}
         />
 
         <ProgressBar

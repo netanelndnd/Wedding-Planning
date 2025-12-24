@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useVendors } from '@/hooks/useVendors';
 import { taskService } from '@/services/firestoreService';
 import { Task } from '@/types';
 
@@ -13,6 +14,7 @@ import { Task } from '@/types';
  */
 export function useDashboard() {
   const { user, couple, isAuthenticated, loading, logout } = useAuth();
+  const { expenses, vendors } = useVendors();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [tasksLoading, setTasksLoading] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
@@ -79,6 +81,11 @@ export function useDashboard() {
     daysUntilWedding,
     completedCount,
     pendingCount,
+    expenses: {
+      total: expenses.total,
+      byCategory: expenses.byCategory,
+      vendorCount: expenses.count,
+    },
     navigateTo,
     handleLogout,
   };

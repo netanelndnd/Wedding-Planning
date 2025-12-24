@@ -20,15 +20,24 @@ function DashboardHeader({ couple, daysUntilWedding, onSettingsClick, onLogoutCl
     <header className="bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 shadow-modern">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center">
-          <div className="animate-fadeIn">
-            <h1 className="text-4xl font-bold text-white mb-2">
-              {couple ? `💍 החתונה של ${couple.partner1Name} ו${couple.partner2Name}` : '💝 דשבורד'}
-            </h1>
-            <p className="text-pink-100 text-lg flex items-center gap-2">
-              {daysUntilWedding > 0
-                ? `⏰ עוד ${daysUntilWedding} ימים עד החתונה! 🎉`
-                : '🎊 היום הגדול הגיע!'}
-            </p>
+          <div className="flex items-center gap-4 animate-fadeIn">
+            {couple?.photoURL && (
+              <img
+                src={couple.photoURL}
+                alt={`${couple.partner1Name} ו${couple.partner2Name}`}
+                className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
+              />
+            )}
+            <div>
+              <h1 className="text-4xl font-bold text-white mb-2">
+                {couple ? `💍 החתונה של ${couple.partner1Name} ו${couple.partner2Name}` : '💝 דשבורד'}
+              </h1>
+              <p className="text-pink-100 text-lg flex items-center gap-2">
+                {daysUntilWedding > 0
+                  ? `⏰ עוד ${daysUntilWedding} ימים עד החתונה! 🎉`
+                  : '🎊 היום הגדול הגיע!'}
+              </p>
+            </div>
           </div>
           <div className="flex gap-3">
             <button

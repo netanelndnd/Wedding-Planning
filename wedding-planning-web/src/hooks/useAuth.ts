@@ -88,6 +88,7 @@ export function useAuth() {
           const coupleData: Couple = {
             ...data,
             id: userId,
+            photoURL: data.photoURL || undefined,
             weddingDate: data.weddingDate?.toDate?.() || data.weddingDate,
             createdAt: data.createdAt?.toDate?.() || data.createdAt,
             updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
@@ -120,6 +121,7 @@ export function useAuth() {
           const coupleData: Couple = {
             ...data,
             id: userId,
+            photoURL: data.photoURL || undefined,
             weddingDate: data.weddingDate?.toDate?.() || data.weddingDate,
             createdAt: data.createdAt?.toDate?.() || data.createdAt,
             updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,

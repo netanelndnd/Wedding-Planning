@@ -4,6 +4,7 @@ export interface Couple {
   partner1Name: string;
   partner2Name: string;
   weddingDate: Date;
+  photoURL?: string; // URL לתמונת הזוג
   createdAt: Date;
   updatedAt: Date;
 }
@@ -53,7 +54,10 @@ export interface Vendor {
   email?: string;
   website?: string;
   address?: string;
-  price?: number;
+  price?: number; // מחיר משוער
+  actualPrice?: number; // מחיר בפועל
+  contractUrl?: string; // URL לחוזה ב-Firebase Storage
+  contractFileName?: string; // שם הקובץ המקורי
   rating?: number;
   notes?: string;
   isSelected: boolean;

@@ -22,9 +22,12 @@ export default function TasksPage() {
   const [showEditTaskModal, setShowEditTaskModal] = useState(false);
   const [showAddEpicModal, setShowAddEpicModal] = useState(false);
   const [showManageEpicsModal, setShowManageEpicsModal] = useState(false);
+  const [showEpicTasksModal, setShowEpicTasksModal] = useState(false);
   
   // Current task being edited
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  // Current epic for viewing tasks
+  const [viewingEpic, setViewingEpic] = useState<Epic | null>(null);
   
   // Filters and Search
   const [searchQuery, setSearchQuery] = useState('');
@@ -129,8 +132,10 @@ export default function TasksPage() {
         title: editingTask.title,
         description: editingTask.description,
         priority: editingTask.priority,
+        status: editingTask.status,
         dueDate: editingTask.dueDate,
         epicId: editingTask.epicId,
+        notes: editingTask.notes,
       });
 
       setShowEditTaskModal(false);
@@ -400,9 +405,24 @@ export default function TasksPage() {
                             📅 {new Date(task.dueDate).toLocaleDateString('he-IL')}
                           </span>
                         )}
-                        <span className="flex items-center gap-1">
+                        <button
+                          onClick={() => {
+                            const epic = epics.find(e => e.id === task.epicId);
+                            if (epic) {
+                              setViewingEpic(epic);
+                              setShowEpicTasksModal(true);
+                            }
+                          }}
+                          className="flex items-center gap-1 hover:text-purple-600 transition-colors"
+                          title="צפה בכל המשימות בנושא זה"
+                        >
                           🏷️ {epics.find(e => e.id === task.epicId)?.title || 'כללי'}
-                        </span>
+                          {tasks.filter(t => t.epicId === task.epicId).length > 1 && (
+                            <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                              ({tasks.filter(t => t.epicId === task.epicId).length})
+                            </span>
+                          )}
+                        </button>
                         <span className="flex items-center gap-1">
                           {task.priority === 'high' && '🔴 גבוהה'}
                           {task.priority === 'medium' && '🟡 בינונית'}
@@ -413,6 +433,37 @@ export default function TasksPage() {
                   </div>
                   
                   <div className="flex gap-2">
+                    <button
+                      onClick={async () => {
+                        if (!task.dueDate) {
+                          alert('אין תאריך יעד למשימה זו. לא ניתן ליצור קובץ יומן.');
+                          return;
+                        }
+                        
+                        try {
+                          // Generate ICS file URL
+                          const baseUrl = window.location.origin;
+                          const icsParams = new URLSearchParams({
+                            title: task.title,
+                            description: task.description || '',
+                            dueDate: new Date(task.dueDate).toISOString(),
+                          });
+                          const icsUrl = `${baseUrl}/api/tasks/${task.id}/ics?${icsParams.toString()}`;
+                          
+                          // Create WhatsApp message with ICS link
+                          const message = `📅 ${task.title}${task.description ? `\n${task.description}` : ''}\n\n📎 הוסף ליומן: ${icsUrl}`;
+                          const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                          window.open(whatsappUrl, '_blank');
+                        } catch (error) {
+                          console.error('Error generating ICS:', error);
+                          alert('שגיאה ביצירת קובץ היומן');
+                        }
+                      }}
+                      className="text-green-500 hover:text-green-700 p-2"
+                      title="שלח לוואטסאפ עם קישור ליומן"
+                    >
+                      📱
+                    </button>
                     <button
                       onClick={() => {
                         setEditingTask(task);
@@ -593,6 +644,30 @@ export default function TasksPage() {
                 />
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">סטטוס</label>
+                <select
+                  value={editingTask.status}
+                  onChange={(e) => setEditingTask({ ...editingTask, status: e.target.value as TaskStatus })}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+                >
+                  <option value="pending">ממתינה</option>
+                  <option value="in-progress">בתהליך</option>
+                  <option value="completed">הושלמה</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">הערות</label>
+                <textarea
+                  value={editingTask.notes || ''}
+                  onChange={(e) => setEditingTask({ ...editingTask, notes: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+                  rows={3}
+                  placeholder="הערות נוספות..."
+                />
+              </div>
+
               <div className="flex gap-2 justify-end mt-6">
                 <button
                   type="button"
@@ -634,24 +709,41 @@ export default function TasksPage() {
               {epics.length === 0 ? (
                 <p className="text-center text-gray-500 py-8">אין נושאים עדיין</p>
               ) : (
-                epics.map(epic => (
-                  <div key={epic.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{epic.title}</h3>
-                      {epic.description && <p className="text-sm text-gray-600 mt-1">{epic.description}</p>}
-                      <p className="text-xs text-gray-500 mt-1">
-                        {tasks.filter(t => t.epicId === epic.id).length} משימות
-                      </p>
+                epics.map(epic => {
+                  const epicTasks = tasks.filter(t => t.epicId === epic.id);
+                  return (
+                    <div key={epic.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900">{epic.title}</h3>
+                        {epic.description && <p className="text-sm text-gray-600 mt-1">{epic.description}</p>}
+                        <p className="text-xs text-gray-500 mt-1">
+                          {epicTasks.length} משימות
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        {epicTasks.length > 0 && (
+                          <button
+                            onClick={() => {
+                              setViewingEpic(epic);
+                              setShowEpicTasksModal(true);
+                            }}
+                            className="text-purple-500 hover:text-purple-700 p-2"
+                            title="צפה בכל המשימות"
+                          >
+                            👁️
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteEpic(epic.id)}
+                          className="text-red-500 hover:text-red-700 p-2"
+                          title="מחק נושא"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => handleDeleteEpic(epic.id)}
-                      className="text-red-500 hover:text-red-700 p-2"
-                      title="מחק נושא"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 
@@ -712,6 +804,170 @@ export default function TasksPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Epic Tasks Modal - Shows all tasks under an Epic */}
+      {showEpicTasksModal && viewingEpic && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">{viewingEpic.title}</h2>
+                {viewingEpic.description && (
+                  <p className="text-gray-600 mt-1">{viewingEpic.description}</p>
+                )}
+                <p className="text-sm text-gray-500 mt-2">
+                  {tasks.filter(t => t.epicId === viewingEpic.id).length} משימות
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowEpicTasksModal(false);
+                  setViewingEpic(null);
+                }}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+                title="סגור"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-3 mt-6">
+              {tasks.filter(t => t.epicId === viewingEpic.id).length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  אין משימות בנושא זה עדיין
+                </div>
+              ) : (
+                tasks
+                  .filter(t => t.epicId === viewingEpic.id)
+                  .sort((a, b) => {
+                    const priorityOrder = { high: 0, medium: 1, low: 2 };
+                    return priorityOrder[a.priority] - priorityOrder[b.priority];
+                  })
+                  .map((task) => (
+                    <div
+                      key={task.id}
+                      className={`p-4 rounded-lg border-r-4 ${getPriorityColor(task.priority)} bg-white shadow-sm hover:shadow-md transition-shadow`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-3 flex-1">
+                          <button
+                            onClick={() => handleToggleStatus(task)}
+                            className={`mt-1 w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer transition ${
+                              task.status === 'completed' 
+                                ? 'bg-green-500 border-green-500' 
+                                : task.status === 'in-progress'
+                                ? 'bg-blue-500 border-blue-500'
+                                : 'border-gray-300 hover:border-pink-500'
+                            }`}
+                          >
+                            {task.status === 'completed' && <span className="text-white text-xs">✓</span>}
+                            {task.status === 'in-progress' && <span className="text-white text-xs">⋯</span>}
+                          </button>
+                          
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className={`font-semibold ${task.status === 'completed' ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+                                {task.title}
+                              </h3>
+                              <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadge(task.status)}`}>
+                                {getStatusText(task.status)}
+                              </span>
+                            </div>
+                            
+                            {task.description && (
+                              <p className="text-sm text-gray-600 mb-2">{task.description}</p>
+                            )}
+                            
+                            {task.notes && (
+                              <p className="text-xs text-gray-500 mb-2 italic">💬 {task.notes}</p>
+                            )}
+                            
+                            <div className="flex flex-wrap gap-3 text-xs text-gray-500">
+                              {task.dueDate && (
+                                <span className="flex items-center gap-1">
+                                  📅 {new Date(task.dueDate).toLocaleDateString('he-IL')}
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1">
+                                {task.priority === 'high' && '🔴 גבוהה'}
+                                {task.priority === 'medium' && '🟡 בינונית'}
+                                {task.priority === 'low' && '🟢 נמוכה'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <button
+                            onClick={async () => {
+                              if (!task.dueDate) {
+                                alert('אין תאריך יעד למשימה זו. לא ניתן ליצור קובץ יומן.');
+                                return;
+                              }
+                              
+                              try {
+                                // Generate ICS file URL
+                                const baseUrl = window.location.origin;
+                                const icsParams = new URLSearchParams({
+                                  title: task.title,
+                                  description: task.description || '',
+                                  dueDate: new Date(task.dueDate).toISOString(),
+                                });
+                                const icsUrl = `${baseUrl}/api/tasks/${task.id}/ics?${icsParams.toString()}`;
+                                
+                                // Create WhatsApp message with ICS link
+                                const message = `📅 ${task.title}${task.description ? `\n${task.description}` : ''}\n\n📎 הוסף ליומן: ${icsUrl}`;
+                                const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                                window.open(whatsappUrl, '_blank');
+                              } catch (error) {
+                                console.error('Error generating ICS:', error);
+                                alert('שגיאה ביצירת קובץ היומן');
+                              }
+                            }}
+                            className="text-green-500 hover:text-green-700 p-2"
+                            title="שלח לוואטסאפ עם קישור ליומן"
+                          >
+                            📱
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingTask(task);
+                              setShowEditTaskModal(true);
+                              setShowEpicTasksModal(false);
+                            }}
+                            className="text-blue-500 hover:text-blue-700 p-2"
+                            title="ערוך"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTask(task.id)}
+                            className="text-red-500 hover:text-red-700 p-2"
+                            title="מחק"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+              )}
+            </div>
+
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => {
+                  setShowEpicTasksModal(false);
+                  setViewingEpic(null);
+                }}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                סגור
+              </button>
+            </div>
           </div>
         </div>
       )}

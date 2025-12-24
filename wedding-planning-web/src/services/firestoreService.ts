@@ -67,13 +67,30 @@ export const taskService = {
       return newTask.id;
     }
 
-    const tasksCollection = collection(db, 'tasks');
-    const docRef = await addDoc(tasksCollection, {
-      ...task,
-      dueDate: task.dueDate ? Timestamp.fromDate(task.dueDate) : null,
+    // Remove undefined values - Firestore doesn't allow undefined
+    const cleanTask: any = {
+      coupleId,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
+    };
+    
+    // Only include fields that are not undefined
+    Object.keys(task).forEach(key => {
+      const value = (task as any)[key];
+      if (value !== undefined) {
+        // Handle Date objects - convert to Timestamp
+        if (key === 'dueDate' && value instanceof Date) {
+          cleanTask[key] = Timestamp.fromDate(value);
+        } else if (key === 'completedAt' && value instanceof Date) {
+          cleanTask[key] = Timestamp.fromDate(value);
+        } else {
+          cleanTask[key] = value;
+        }
+      }
     });
+    
+    const tasksCollection = collection(db, 'tasks');
+    const docRef = await addDoc(tasksCollection, cleanTask);
     return docRef.id;
   },
 
@@ -83,18 +100,28 @@ export const taskService = {
       return;
     }
 
-    const taskRef = doc(db, 'tasks', taskId);
-    const processedUpdates: any = {
-      ...updates,
+    // Remove undefined values - Firestore doesn't allow undefined
+    const cleanUpdates: any = {
       updatedAt: Timestamp.now(),
     };
-    if (updates.dueDate) {
-      processedUpdates.dueDate = Timestamp.fromDate(updates.dueDate);
-    }
-    if (updates.completedAt) {
-      processedUpdates.completedAt = Timestamp.fromDate(updates.completedAt);
-    }
-    await updateDoc(taskRef, processedUpdates);
+    
+    // Only include fields that are not undefined
+    Object.keys(updates).forEach(key => {
+      const value = (updates as any)[key];
+      if (value !== undefined) {
+        // Handle Date objects - convert to Timestamp
+        if (key === 'dueDate' && value instanceof Date) {
+          cleanUpdates[key] = Timestamp.fromDate(value);
+        } else if (key === 'completedAt' && value instanceof Date) {
+          cleanUpdates[key] = Timestamp.fromDate(value);
+        } else {
+          cleanUpdates[key] = value;
+        }
+      }
+    });
+    
+    const taskRef = doc(db, 'tasks', taskId);
+    await updateDoc(taskRef, cleanUpdates);
   },
 
   async deleteTask(taskId: string) {
@@ -155,13 +182,23 @@ export const epicService = {
       return newEpic.id;
     }
 
-    const epicsCollection = collection(db, 'epics');
-    const docRef = await addDoc(epicsCollection, {
-      ...epic,
+    // Remove undefined values - Firestore doesn't allow undefined
+    const cleanEpic: any = {
       coupleId,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
+    };
+    
+    // Only include fields that are not undefined
+    Object.keys(epic).forEach(key => {
+      const value = (epic as any)[key];
+      if (value !== undefined) {
+        cleanEpic[key] = value;
+      }
     });
+    
+    const epicsCollection = collection(db, 'epics');
+    const docRef = await addDoc(epicsCollection, cleanEpic);
     return docRef.id;
   },
 
@@ -188,11 +225,22 @@ export const epicService = {
 
   async updateEpic(epicId: string, updates: Partial<Epic>) {
     if (isMockMode) return; // Not implemented for mock
-    const epicRef = doc(db, 'epics', epicId);
-    await updateDoc(epicRef, {
-      ...updates,
+    
+    // Remove undefined values - Firestore doesn't allow undefined
+    const cleanUpdates: any = {
       updatedAt: Timestamp.now(),
+    };
+    
+    // Only include fields that are not undefined
+    Object.keys(updates).forEach(key => {
+      const value = (updates as any)[key];
+      if (value !== undefined) {
+        cleanUpdates[key] = value;
+      }
     });
+    
+    const epicRef = doc(db, 'epics', epicId);
+    await updateDoc(epicRef, cleanUpdates);
   },
 
   async deleteEpic(epicId: string) {
@@ -210,13 +258,24 @@ export const epicService = {
 export const vendorService = {
   async addVendor(coupleId: string, vendor: Omit<Vendor, 'id' | 'createdAt' | 'updatedAt'>) {
     if (isMockMode) return 'mock-vendor-id'; 
-    const vendorsCollection = collection(db, 'vendors');
-    const docRef = await addDoc(vendorsCollection, {
-      ...vendor,
+    
+    // Remove undefined values - Firestore doesn't allow undefined
+    const cleanVendor: any = {
       coupleId,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
+    };
+    
+    // Only include fields that are not undefined
+    Object.keys(vendor).forEach(key => {
+      const value = (vendor as any)[key];
+      if (value !== undefined) {
+        cleanVendor[key] = value;
+      }
     });
+    
+    const vendorsCollection = collection(db, 'vendors');
+    const docRef = await addDoc(vendorsCollection, cleanVendor);
     return docRef.id;
   },
 
@@ -242,11 +301,22 @@ export const vendorService = {
 
   async updateVendor(vendorId: string, updates: Partial<Vendor>) {
     if (isMockMode) return;
-    const vendorRef = doc(db, 'vendors', vendorId);
-    await updateDoc(vendorRef, {
-      ...updates,
+    
+    // Remove undefined values - Firestore doesn't allow undefined
+    const cleanUpdates: any = {
       updatedAt: Timestamp.now(),
+    };
+    
+    // Only include fields that are not undefined
+    Object.keys(updates).forEach(key => {
+      const value = (updates as any)[key];
+      if (value !== undefined) {
+        cleanUpdates[key] = value;
+      }
     });
+    
+    const vendorRef = doc(db, 'vendors', vendorId);
+    await updateDoc(vendorRef, cleanUpdates);
   },
 
   async deleteVendor(vendorId: string) {
@@ -259,13 +329,24 @@ export const vendorService = {
 export const guestService = {
   async addGuest(coupleId: string, guest: Omit<Guest, 'id' | 'createdAt' | 'updatedAt'>) {
     if (isMockMode) return 'mock-guest-id';
-    const guestsCollection = collection(db, 'guests');
-    const docRef = await addDoc(guestsCollection, {
-      ...guest,
+    
+    // Remove undefined values - Firestore doesn't allow undefined
+    const cleanGuest: any = {
       coupleId,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
+    };
+    
+    // Only include fields that are not undefined
+    Object.keys(guest).forEach(key => {
+      const value = (guest as any)[key];
+      if (value !== undefined) {
+        cleanGuest[key] = value;
+      }
     });
+    
+    const guestsCollection = collection(db, 'guests');
+    const docRef = await addDoc(guestsCollection, cleanGuest);
     return docRef.id;
   },
 
@@ -293,11 +374,22 @@ export const guestService = {
 
   async updateGuest(guestId: string, updates: Partial<Guest>) {
     if (isMockMode) return;
-    const guestRef = doc(db, 'guests', guestId);
-    await updateDoc(guestRef, {
-      ...updates,
+    
+    // Remove undefined values - Firestore doesn't allow undefined
+    const cleanUpdates: any = {
       updatedAt: Timestamp.now(),
+    };
+    
+    // Only include fields that are not undefined
+    Object.keys(updates).forEach(key => {
+      const value = (updates as any)[key];
+      if (value !== undefined) {
+        cleanUpdates[key] = value;
+      }
     });
+    
+    const guestRef = doc(db, 'guests', guestId);
+    await updateDoc(guestRef, cleanUpdates);
   },
 
   async deleteGuest(guestId: string) {
