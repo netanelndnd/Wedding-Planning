@@ -20,31 +20,48 @@ export function useForgotPassword() {
 
     try {
       // Dynamic imports - load Firebase only when needed
-      const [{ sendPasswordResetEmail }, { auth }] = await Promise.all([
+      // Using getAuth() and sendPasswordResetEmail as per Firebase official documentation
+      const [{ getAuth, sendPasswordResetEmail }, firebaseModule] = await Promise.all([
         import('firebase/auth'),
         import('@/lib/firebase')
       ]);
       
+      // Initialize auth instance (following Firebase official pattern)
+      // Option 1: Use getAuth() without parameter (uses default app)
+      // Option 2: Use getAuth(app) if app is available
+      // We'll use getAuth() which automatically uses the default Firebase app
+      const auth = getAuth();
+      
       console.log('Sending password reset email to:', email);
+      
+      // Send password reset email
+      // Password reset email sent successfully!
       await sendPasswordResetEmail(auth, email);
       console.log('Password reset email sent successfully');
       setSuccess(true);
-    } catch (err: any) {
-      console.error('Error sending password reset email:', err);
-      let errorMessage = 'שגיאה בשליחת המייל';
+    } catch (error: any) {
+      // Handle errors
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.error('Error sending password reset email:', {
+        code: errorCode,
+        message: errorMessage
+      });
+      
+      let userFriendlyMessage = 'שגיאה בשליחת המייל';
       
       // Firebase error handling
-      if (err.code === 'auth/user-not-found') {
-        errorMessage = 'כתובת מייל זו לא רשומה במערכת';
-      } else if (err.code === 'auth/invalid-email') {
-        errorMessage = 'כתובת מייל לא תקינה';
-      } else if (err.code === 'auth/too-many-requests') {
-        errorMessage = 'יותר מדי בקשות. אנא נסה שוב מאוחר יותר';
-      } else if (err.message) {
-        errorMessage = err.message;
+      if (errorCode === 'auth/user-not-found') {
+        userFriendlyMessage = 'כתובת מייל זו לא רשומה במערכת';
+      } else if (errorCode === 'auth/invalid-email') {
+        userFriendlyMessage = 'כתובת מייל לא תקינה';
+      } else if (errorCode === 'auth/too-many-requests') {
+        userFriendlyMessage = 'יותר מדי בקשות. אנא נסה שוב מאוחר יותר';
+      } else if (errorMessage) {
+        userFriendlyMessage = errorMessage;
       }
       
-      setError(errorMessage);
+      setError(userFriendlyMessage);
     } finally {
       setLoading(false);
     }

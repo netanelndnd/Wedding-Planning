@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, setPersistence, browserLocalPersistence, Auth } from 'firebase/auth';
 import { getFirestore, Firestore, enableNetwork, disableNetwork } from 'firebase/firestore';
+import { getDatabase, Database } from 'firebase/database';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 import { getMessaging, isSupported } from 'firebase/messaging';
 
@@ -11,6 +12,8 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  // Realtime Database URL
+  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || `https://${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}-default-rtdb.europe-west1.firebasedatabase.app`,
 };
 
 // Check if config is valid
@@ -25,6 +28,7 @@ console.log('Firebase Config Check:', {
 let app;
 let auth: Auth;
 let db: Firestore;
+let rtdb: Database; // Realtime Database
 let storage: FirebaseStorage;
 let messaging: Promise<any>;
 
@@ -37,13 +41,17 @@ if (!isMockMode) {
     auth = getAuth(app);
     setPersistence(auth, browserLocalPersistence);
     
-    // Initialize Firestore
+    // Initialize Firestore (optional - can be removed if only using Realtime Database)
     db = getFirestore(app);
     
     // Force Firestore to be online (disable offline persistence issues)
     enableNetwork(db).catch((err) => {
       console.warn('Could not enable Firestore network:', err);
     });
+    
+    // Initialize Realtime Database
+    rtdb = getDatabase(app);
+    console.log('Realtime Database initialized:', firebaseConfig.databaseURL);
     
     // Initialize Firebase Storage
     storage = getStorage(app);
@@ -63,7 +71,8 @@ if (!isMockMode) {
   // when it receives a partial object. null tells the hook to skip subscription.
   auth = null as unknown as Auth;
   db = null as unknown as Firestore;
+  rtdb = null as unknown as Database;
 }
 
-export { app, auth, db, storage, messaging };
+export { app, auth, db, rtdb, storage, messaging };
 export default app;
