@@ -284,6 +284,8 @@ export const guestService = {
           createdAt: data.createdAt?.toDate?.() || data.createdAt,
           updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
         } as Guest;
+
+        //כככ
       });
       callback(guests);
     });

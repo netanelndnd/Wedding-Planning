@@ -46,7 +46,7 @@ if (!isMockMode) {
     
     // Force Firestore to be online (disable offline persistence issues)
     enableNetwork(db).catch((err) => {
-      console.warn('Could not enable Firestore network:', err);
+      console.warn('Could notחחח enable Firestore network:', err);
     });
     
     // Initialize Realtime Database
