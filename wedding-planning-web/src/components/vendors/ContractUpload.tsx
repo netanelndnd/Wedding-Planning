@@ -67,13 +67,15 @@ export default function ContractUpload({ vendor, onUpload, onDelete, uploading }
 
   return (
     <div className="glass p-4 rounded-xl shadow-modern">
-      <h3 className="text-lg font-bold mb-3 gradient-text">📄 חוזה</h3>
+      <h3 className="text-lg font-bold mb-3 gradient-text">חוזה</h3>
       
       {vendor.contractUrl ? (
         <div className="space-y-3">
           <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">📎</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+              </svg>
               <div>
                 <p className="font-semibold text-gray-900">{vendor.contractFileName || 'חוזה'}</p>
                 <p className="text-sm text-gray-600">חוזה קיים</p>
@@ -114,12 +116,17 @@ export default function ContractUpload({ vendor, onUpload, onDelete, uploading }
           >
             {uploading ? (
               <>
-                <span className="animate-spin">⏳</span>
+                <svg className="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
                 <span>מעלה...</span>
               </>
             ) : (
               <>
-                <span>📤</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
                 <span>העלה חוזה</span>
               </>
             )}

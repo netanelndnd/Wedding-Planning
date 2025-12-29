@@ -148,14 +148,16 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-      <header className="bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 shadow-modern">
+    <div className="min-h-screen wedding-bg">
+      <header className="bg-gradient-to-r from-[#6D28D9] via-[#7C3AED] to-[#BE185D] shadow-lg relative z-10">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-white">⚙️ הגדרות</h1>
+            <h1 className="text-3xl font-serif font-bold text-white">
+              הגדרות
+            </h1>
             <button
               onClick={() => router.push('/dashboard')}
-              className="px-4 py-2 bg-white text-pink-600 rounded-xl hover:bg-pink-50 font-bold transition-all duration-300"
+              className="px-6 py-3 bg-white/95 text-[#6D28D9] rounded-xl hover:bg-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               ← חזרה לדשבורד
             </button>
@@ -163,10 +165,12 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="max-w-4xl mx-auto px-4 py-8 relative z-10">
         {/* Profile Photo Section */}
         <div className="glass p-8 rounded-2xl shadow-modern mb-8">
-          <h2 className="text-2xl font-bold mb-6 gradient-text">📸 תמונת הזוג</h2>
+          <h2 className="text-2xl font-serif font-bold mb-6 gradient-text">
+            תמונת הזוג
+          </h2>
           
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="flex-shrink-0">
@@ -174,11 +178,13 @@ export default function SettingsPage() {
                 <img
                   src={couple.photoURL}
                   alt={`${couple.partner1Name} ו${couple.partner2Name}`}
-                  className="w-32 h-32 rounded-full object-cover border-4 border-pink-300 shadow-lg"
+                  className="w-32 h-32 rounded-full object-cover border-4 border-[#6D28D9]/30 shadow-lg"
                 />
               ) : (
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center border-4 border-pink-300 shadow-lg">
-                  <span className="text-5xl">💑</span>
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#6D28D9]/10 to-[#BE185D]/10 flex items-center justify-center border-4 border-[#6D28D9]/30 shadow-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-[#6D28D9]/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                  </svg>
                 </div>
               )}
             </div>
@@ -194,19 +200,9 @@ export default function SettingsPage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingPhoto}
-                className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full md:w-auto btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {uploadingPhoto ? (
-                  <>
-                    <span className="animate-spin">⏳</span>
-                    <span>מעלה...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>📤</span>
-                    <span>{couple?.photoURL ? 'עדכן תמונה' : 'העלה תמונה'}</span>
-                  </>
-                )}
+                {uploadingPhoto ? 'מעלה...' : (couple?.photoURL ? 'עדכן תמונה' : 'העלה תמונה')}
               </button>
               <p className="text-xs text-gray-500">
                 JPG, PNG, WEBP (מקסימום 5MB)
@@ -220,7 +216,7 @@ export default function SettingsPage() {
               
               {photoSuccess && (
                 <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-600">✅ התמונה עודכנה בהצלחה!</p>
+                  <p className="text-sm text-green-600">התמונה עודכנה בהצלחה!</p>
                 </div>
               )}
             </div>
@@ -229,11 +225,13 @@ export default function SettingsPage() {
 
         {/* Change Password Section */}
         <div className="glass p-8 rounded-2xl shadow-modern">
-          <h2 className="text-2xl font-bold mb-6 gradient-text">🔒 שינוי סיסמה</h2>
+          <h2 className="text-2xl font-serif font-bold mb-6 gradient-text">
+            שינוי סיסמה
+          </h2>
           
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-[#2D2A32] mb-2">
                 סיסמה נוכחית *
               </label>
               <input
@@ -241,13 +239,13 @@ export default function SettingsPage() {
                 required
                 value={passwordData.currentPassword}
                 onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] transition-all duration-300 bg-white/70"
                 placeholder="הזן סיסמה נוכחית"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-[#2D2A32] mb-2">
                 סיסמה חדשה *
               </label>
               <input
@@ -255,14 +253,14 @@ export default function SettingsPage() {
                 required
                 value={passwordData.newPassword}
                 onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] transition-all duration-300 bg-white/70"
                 placeholder="הזן סיסמה חדשה (מינימום 6 תווים)"
                 minLength={6}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-[#2D2A32] mb-2">
                 אימות סיסמה חדשה *
               </label>
               <input
@@ -270,7 +268,7 @@ export default function SettingsPage() {
                 required
                 value={passwordData.confirmPassword}
                 onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] transition-all duration-300 bg-white/70"
                 placeholder="הזן שוב את הסיסמה החדשה"
                 minLength={6}
               />
@@ -283,8 +281,8 @@ export default function SettingsPage() {
             )}
 
             {passwordSuccess && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-sm text-green-600">✅ הסיסמה שונתה בהצלחה!</p>
+              <div className="p-3 bg-[#87A878]/20 border border-[#87A878]/50 rounded-lg">
+                <p className="text-sm text-[#87A878] font-medium">הסיסמה שונתה בהצלחה!</p>
               </div>
             )}
 
@@ -292,7 +290,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={changingPassword}
-                className="px-6 py-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl font-bold hover:from-pink-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {changingPassword ? 'משנה...' : 'שנה סיסמה'}
               </button>

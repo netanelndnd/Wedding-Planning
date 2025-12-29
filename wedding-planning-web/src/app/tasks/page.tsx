@@ -278,52 +278,66 @@ export default function TasksPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
+      <div className="flex items-center justify-center min-h-screen wedding-bg">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6D28D9]"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6" dir="rtl">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">ניהול משימות</h1>
-            <p className="text-gray-600 mt-1">{filteredTasks.length} משימות</p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowManageEpicsModal(true)}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
-            >
-              🗂️ נושאים
-            </button>
-            <button
-              onClick={() => setShowAddTaskModal(true)}
-              className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 flex items-center gap-2"
-            >
-              <span>+</span> משימה חדשה
-            </button>
+    <div className="min-h-screen wedding-bg" dir="rtl">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-[#6D28D9] via-[#7C3AED] to-[#BE185D] shadow-lg relative z-10">
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-serif font-bold text-white">
+                ניהול משימות
+              </h1>
+              <p className="text-white/80 mt-1 font-sans">{filteredTasks.length} משימות</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowManageEpicsModal(true)}
+                className="px-4 py-2.5 bg-white/20 backdrop-blur text-white rounded-xl hover:bg-white/30 font-semibold transition-all duration-300"
+              >
+                נושאים
+              </button>
+              <button
+                onClick={() => setShowAddTaskModal(true)}
+                className="px-4 py-2.5 bg-white/95 text-[#6D28D9] rounded-xl hover:bg-white font-semibold transition-all duration-300 shadow-lg"
+              >
+                + משימה חדשה
+              </button>
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="px-4 py-2.5 bg-white/95 text-[#6D28D9] rounded-xl hover:bg-white font-semibold transition-all duration-300 shadow-lg"
+              >
+                ← חזרה
+              </button>
+            </div>
           </div>
         </div>
+      </header>
 
+      <main className="max-w-6xl mx-auto px-4 py-6 relative z-10">
         {/* Filters and Search */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <div className="glass rounded-2xl shadow-modern p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <input
-              type="text"
-              placeholder="🔍 חיפוש משימות..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="חיפוש משימות..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2.5 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none transition-all duration-300 bg-white/70 text-[#2D2A32]"
+              />
+            </div>
             
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value as FilterType)}
-              className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+              className="px-4 py-2.5 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none transition-all duration-300 bg-white/70 text-[#2D2A32]"
             >
               <option value="all">כל הסטטוסים</option>
               <option value="pending">ממתינות</option>
@@ -334,7 +348,7 @@ export default function TasksPage() {
             <select
               value={filterEpic}
               onChange={(e) => setFilterEpic(e.target.value)}
-              className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+              className="px-4 py-2.5 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none transition-all duration-300 bg-white/70 text-[#2D2A32]"
             >
               <option value="all">כל הנושאים</option>
               {epics.map(epic => (
@@ -345,7 +359,7 @@ export default function TasksPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortType)}
-              className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+              className="px-4 py-2.5 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none transition-all duration-300 bg-white/70 text-[#2D2A32]"
             >
               <option value="priority">מיין לפי עדיפות</option>
               <option value="dueDate">מיין לפי תאריך יעד</option>
@@ -359,8 +373,8 @@ export default function TasksPage() {
           {filteredTasks.length === 0 ? (
             <div className="text-center py-10 bg-white rounded-lg shadow text-gray-500">
               {searchQuery || filterStatus !== 'all' || filterEpic !== 'all' 
-                ? 'לא נמצאו משימות תואמות 🔍'
-                : 'אין משימות עדיין. הגיע הזמן להתחיל לתכנן! 🎉'
+                ? 'לא נמצאו משימות תואמות'
+                : 'אין משימות עדיין. הגיע הזמן להתחיל לתכנן!'
               }
             </div>
           ) : (
@@ -402,7 +416,7 @@ export default function TasksPage() {
                       <div className="flex flex-wrap gap-2 text-sm text-gray-500">
                         {task.dueDate && (
                           <span className="flex items-center gap-1">
-                            📅 {new Date(task.dueDate).toLocaleDateString('he-IL')}
+                            {new Date(task.dueDate).toLocaleDateString('he-IL')}
                           </span>
                         )}
                         <button
@@ -416,7 +430,7 @@ export default function TasksPage() {
                           className="flex items-center gap-1 hover:text-purple-600 transition-colors"
                           title="צפה בכל המשימות בנושא זה"
                         >
-                          🏷️ {epics.find(e => e.id === task.epicId)?.title || 'כללי'}
+                          {epics.find(e => e.id === task.epicId)?.title || 'כללי'}
                           {tasks.filter(t => t.epicId === task.epicId).length > 1 && (
                             <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
                               ({tasks.filter(t => t.epicId === task.epicId).length})
@@ -424,9 +438,12 @@ export default function TasksPage() {
                           )}
                         </button>
                         <span className="flex items-center gap-1">
-                          {task.priority === 'high' && '🔴 גבוהה'}
-                          {task.priority === 'medium' && '🟡 בינונית'}
-                          {task.priority === 'low' && '🟢 נמוכה'}
+                          {task.priority === 'high' && <span className="w-2 h-2 rounded-full bg-red-500 inline-block"></span>}
+                          {task.priority === 'medium' && <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block"></span>}
+                          {task.priority === 'low' && <span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span>}
+                          {task.priority === 'high' && ' גבוהה'}
+                          {task.priority === 'medium' && ' בינונית'}
+                          {task.priority === 'low' && ' נמוכה'}
                         </span>
                       </div>
                     </div>
@@ -450,7 +467,7 @@ export default function TasksPage() {
                           const icsUrl = `${baseUrl}/api/tasks/${task.id}/ics?${icsParams.toString()}`;
                           
                           // Create clean WhatsApp message
-                          const taskTitle = task.title.replace(/[📅📎]/g, '').trim(); // Remove emojis from title
+                          const taskTitle = task.title.trim();
                           const dateStr = new Date(task.dueDate).toLocaleDateString('he-IL', {
                             year: 'numeric',
                             month: '2-digit',
@@ -459,13 +476,13 @@ export default function TasksPage() {
                           
                           // Build message parts
                           let messageParts: string[] = [];
-                          messageParts.push(`📅 ${taskTitle}`);
+                          messageParts.push(taskTitle);
                           if (task.description) {
                             messageParts.push(task.description);
                           }
                           messageParts.push(`תאריך: ${dateStr}`);
                           messageParts.push('');
-                          messageParts.push(`📎 הוסף ליומן:`);
+                          messageParts.push(`הוסף ליומן:`);
                           messageParts.push(icsUrl);
                           
                           const message = messageParts.join('\n');
@@ -476,7 +493,7 @@ export default function TasksPage() {
                             whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
                           } catch (encodeError) {
                             // Fallback: use a simpler message if encoding fails
-                            const simpleMessage = `📅 ${taskTitle}\nתאריך: ${dateStr}\n\n📎 הוסף ליומן:\n${icsUrl}`;
+                            const simpleMessage = `${taskTitle}\nתאריך: ${dateStr}\n\nהוסף ליומן:\n${icsUrl}`;
                             whatsappUrl = `https://wa.me/?text=${encodeURIComponent(simpleMessage)}`;
                           }
                           
@@ -489,7 +506,9 @@ export default function TasksPage() {
                       className="text-green-500 hover:text-green-700 p-2"
                       title="שלח לוואטסאפ עם קישור ליומן"
                     >
-                      📱
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                      </svg>
                     </button>
                     <button
                       onClick={() => {
@@ -499,14 +518,18 @@ export default function TasksPage() {
                       className="text-blue-500 hover:text-blue-700 p-2"
                       title="ערוך"
                     >
-                      ✏️
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                      </svg>
                     </button>
                     <button
                       onClick={() => handleDeleteTask(task.id)}
                       className="text-red-500 hover:text-red-700 p-2"
                       title="מחק"
                     >
-                      🗑️
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -514,43 +537,43 @@ export default function TasksPage() {
             ))
           )}
         </div>
-      </div>
+      </main>
 
       {/* Add Task Modal */}
       {showAddTaskModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4 text-gray-900">הוספת משימה חדשה</h2>
-            <form onSubmit={handleCreateTask} className="space-y-4">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-[#6D28D9]/20 animate-modalIn">
+            <h2 className="text-2xl font-serif font-bold mb-6 text-[#2D2A32] border-b border-[#6D28D9]/20 pb-4">הוספת משימה חדשה</h2>
+            <form onSubmit={handleCreateTask} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">כותרת *</label>
+                <label className="block text-sm font-semibold text-[#2D2A32] mb-2">כותרת *</label>
                 <input
                   type="text"
                   required
                   value={newTask.title}
                   onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none bg-white text-[#2D2A32] transition-all duration-300"
                   placeholder="לדוגמה: לסגור אולם"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">תיאור</label>
+                <label className="block text-sm font-semibold text-[#2D2A32] mb-2">תיאור</label>
                 <textarea
                   value={newTask.description}
                   onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none bg-white text-[#2D2A32] transition-all duration-300"
                   rows={3}
                   placeholder="פרטים נוספים..."
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">נושא (Epic)</label>
+                <label className="block text-sm font-semibold text-[#2D2A32] mb-2">נושא (Epic)</label>
                 <select
                   value={newTask.epicId}
                   onChange={(e) => setNewTask({ ...newTask, epicId: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none bg-white text-[#2D2A32] transition-all duration-300"
                 >
                   {epics.length === 0 ? (
                     <option value="">ייווצר נושא "כללי" אוטומטית</option>
@@ -566,39 +589,39 @@ export default function TasksPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">עדיפות</label>
+                <label className="block text-sm font-semibold text-[#2D2A32] mb-2">עדיפות</label>
                 <select
                   value={newTask.priority}
                   onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as Priority })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none bg-white text-[#2D2A32] transition-all duration-300"
                 >
-                  <option value="low">🟢 נמוכה</option>
-                  <option value="medium">🟡 בינונית</option>
-                  <option value="high">🔴 גבוהה</option>
+                  <option value="low">נמוכה</option>
+                  <option value="medium">בינונית</option>
+                  <option value="high">גבוהה</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">תאריך יעד</label>
+                <label className="block text-sm font-semibold text-[#2D2A32] mb-2">תאריך יעד</label>
                 <input
                   type="date"
                   value={newTask.dueDate}
                   onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none bg-white text-[#2D2A32] transition-all duration-300"
                 />
               </div>
 
-              <div className="flex gap-2 justify-end mt-6">
+              <div className="flex gap-3 justify-end mt-8 pt-4 border-t border-[#6D28D9]/20">
                 <button
                   type="button"
                   onClick={() => setShowAddTaskModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                  className="px-6 py-3 text-[#2D2A32] bg-[#F5F3EF] hover:bg-[#E8E5E0] rounded-xl font-semibold transition-all duration-300"
                 >
                   ביטול
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700"
+                  className="px-6 py-3 bg-gradient-to-r from-[#6D28D9] to-[#BE185D] text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300"
                 >
                   צור משימה
                 </button>
@@ -610,37 +633,37 @@ export default function TasksPage() {
 
       {/* Edit Task Modal */}
       {showEditTaskModal && editingTask && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4 text-gray-900">עריכת משימה</h2>
-            <form onSubmit={handleUpdateTask} className="space-y-4">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-[#6D28D9]/20 animate-modalIn">
+            <h2 className="text-2xl font-serif font-bold mb-6 text-[#2D2A32] border-b border-[#6D28D9]/20 pb-4">עריכת משימה</h2>
+            <form onSubmit={handleUpdateTask} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">כותרת *</label>
+                <label className="block text-sm font-semibold text-[#2D2A32] mb-2">כותרת *</label>
                 <input
                   type="text"
                   required
                   value={editingTask.title}
                   onChange={(e) => setEditingTask({ ...editingTask, title: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none bg-white text-[#2D2A32] transition-all duration-300"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">תיאור</label>
+                <label className="block text-sm font-semibold text-[#2D2A32] mb-2">תיאור</label>
                 <textarea
                   value={editingTask.description || ''}
                   onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none bg-white text-[#2D2A32] transition-all duration-300"
                   rows={3}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">נושא</label>
+                <label className="block text-sm font-semibold text-[#2D2A32] mb-2">נושא</label>
                 <select
                   value={editingTask.epicId}
                   onChange={(e) => setEditingTask({ ...editingTask, epicId: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none bg-white text-[#2D2A32] transition-all duration-300"
                 >
                   {epics.map(epic => (
                     <option key={epic.id} value={epic.id}>{epic.title}</option>
@@ -649,34 +672,34 @@ export default function TasksPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">עדיפות</label>
+                <label className="block text-sm font-semibold text-[#2D2A32] mb-2">עדיפות</label>
                 <select
                   value={editingTask.priority}
                   onChange={(e) => setEditingTask({ ...editingTask, priority: e.target.value as Priority })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none bg-white text-[#2D2A32] transition-all duration-300"
                 >
-                  <option value="low">🟢 נמוכה</option>
-                  <option value="medium">🟡 בינונית</option>
-                  <option value="high">🔴 גבוהה</option>
+                  <option value="low">נמוכה</option>
+                  <option value="medium">בינונית</option>
+                  <option value="high">גבוהה</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">תאריך יעד</label>
+                <label className="block text-sm font-semibold text-[#2D2A32] mb-2">תאריך יעד</label>
                 <input
                   type="date"
                   value={editingTask.dueDate ? new Date(editingTask.dueDate).toISOString().split('T')[0] : ''}
                   onChange={(e) => setEditingTask({ ...editingTask, dueDate: e.target.value ? new Date(e.target.value) : undefined })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none bg-white text-[#2D2A32] transition-all duration-300"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">סטטוס</label>
+                <label className="block text-sm font-semibold text-[#2D2A32] mb-2">סטטוס</label>
                 <select
                   value={editingTask.status}
                   onChange={(e) => setEditingTask({ ...editingTask, status: e.target.value as TaskStatus })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none bg-white text-[#2D2A32] transition-all duration-300"
                 >
                   <option value="pending">ממתינה</option>
                   <option value="in-progress">בתהליך</option>
@@ -685,30 +708,30 @@ export default function TasksPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">הערות</label>
+                <label className="block text-sm font-semibold text-[#2D2A32] mb-2">הערות</label>
                 <textarea
                   value={editingTask.notes || ''}
                   onChange={(e) => setEditingTask({ ...editingTask, notes: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none bg-white text-[#2D2A32] transition-all duration-300"
                   rows={3}
                   placeholder="הערות נוספות..."
                 />
               </div>
 
-              <div className="flex gap-2 justify-end mt-6">
+              <div className="flex gap-3 justify-end mt-8 pt-4 border-t border-[#6D28D9]/20">
                 <button
                   type="button"
                   onClick={() => {
                     setShowEditTaskModal(false);
                     setEditingTask(null);
                   }}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                  className="px-6 py-3 text-[#2D2A32] bg-[#F5F3EF] hover:bg-[#E8E5E0] rounded-xl font-semibold transition-all duration-300"
                 >
                   ביטול
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-6 py-3 bg-gradient-to-r from-[#6D28D9] to-[#BE185D] text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300"
                 >
                   שמור שינויים
                 </button>
@@ -720,13 +743,13 @@ export default function TasksPage() {
 
       {/* Manage Epics Modal */}
       {showManageEpicsModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900">ניהול נושאים (Epics)</h2>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-[#6D28D9]/20 animate-modalIn">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-[#2D2A32]">ניהול נושאים (Epics)</h2>
               <button
                 onClick={() => setShowAddEpicModal(true)}
-                className="px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm"
+                className="px-4 py-2 bg-gradient-to-r from-[#6D28D9] to-[#BE185D] text-white rounded-xl hover:shadow-lg text-sm font-semibold transition-all duration-300"
               >
                 + נושא חדש
               </button>
@@ -734,16 +757,16 @@ export default function TasksPage() {
 
             <div className="space-y-3">
               {epics.length === 0 ? (
-                <p className="text-center text-gray-500 py-8">אין נושאים עדיין</p>
+                <p className="text-center text-[#6B6573] py-8">אין נושאים עדיין</p>
               ) : (
                 epics.map(epic => {
                   const epicTasks = tasks.filter(t => t.epicId === epic.id);
                   return (
-                    <div key={epic.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                    <div key={epic.id} className="flex items-center justify-between p-4 border-2 border-[#6D28D9]/20 rounded-xl hover:bg-[#F5F3EF] transition-all duration-300">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{epic.title}</h3>
-                        {epic.description && <p className="text-sm text-gray-600 mt-1">{epic.description}</p>}
-                        <p className="text-xs text-gray-500 mt-1">
+                        <h3 className="font-semibold text-[#2D2A32]">{epic.title}</h3>
+                        {epic.description && <p className="text-sm text-[#6B6573] mt-1">{epic.description}</p>}
+                        <p className="text-xs text-[#6B6573] mt-1">
                           {epicTasks.length} משימות
                         </p>
                       </div>
@@ -754,10 +777,13 @@ export default function TasksPage() {
                               setViewingEpic(epic);
                               setShowEpicTasksModal(true);
                             }}
-                            className="text-purple-500 hover:text-purple-700 p-2"
+                            className="text-[#6D28D9] hover:text-[#BE185D] p-2 transition-colors duration-300"
                             title="צפה בכל המשימות"
                           >
-                            👁️
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
                           </button>
                         )}
                         <button
@@ -765,7 +791,9 @@ export default function TasksPage() {
                           className="text-red-500 hover:text-red-700 p-2"
                           title="מחק נושא"
                         >
-                          🗑️
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                          </svg>
                         </button>
                       </div>
                     </div>
@@ -774,10 +802,10 @@ export default function TasksPage() {
               )}
             </div>
 
-            <div className="flex justify-end mt-6">
+            <div className="flex justify-end mt-8 pt-4 border-t border-[#6D28D9]/20">
               <button
                 onClick={() => setShowManageEpicsModal(false)}
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                className="px-6 py-3 text-[#2D2A32] bg-[#F5F3EF] hover:bg-[#E8E5E0] rounded-xl font-semibold transition-all duration-300"
               >
                 סגור
               </button>
@@ -788,44 +816,44 @@ export default function TasksPage() {
 
       {/* Add Epic Modal */}
       {showAddEpicModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4 text-gray-900">יצירת נושא חדש</h2>
-            <form onSubmit={handleCreateEpic} className="space-y-4">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl border border-[#6D28D9]/20 animate-modalIn">
+            <h2 className="text-2xl font-bold mb-6 text-[#2D2A32]">יצירת נושא חדש</h2>
+            <form onSubmit={handleCreateEpic} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">שם הנושא *</label>
+                <label className="block text-sm font-semibold text-[#2D2A32] mb-2">שם הנושא *</label>
                 <input
                   type="text"
                   required
                   value={newEpic.title}
                   onChange={(e) => setNewEpic({ ...newEpic, title: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none bg-white text-[#2D2A32] transition-all duration-300"
                   placeholder="לדוגמה: אולם וקייטרינג"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">תיאור</label>
+                <label className="block text-sm font-semibold text-[#2D2A32] mb-2">תיאור</label>
                 <textarea
                   value={newEpic.description}
                   onChange={(e) => setNewEpic({ ...newEpic, description: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                  className="w-full px-4 py-3 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] outline-none bg-white text-[#2D2A32] transition-all duration-300"
                   rows={3}
                   placeholder="תיאור קצר של הנושא..."
                 />
               </div>
 
-              <div className="flex gap-2 justify-end mt-6">
+              <div className="flex gap-3 justify-end mt-8 pt-4 border-t border-[#6D28D9]/20">
                 <button
                   type="button"
                   onClick={() => setShowAddEpicModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                  className="px-6 py-3 text-[#2D2A32] bg-[#F5F3EF] hover:bg-[#E8E5E0] rounded-xl font-semibold transition-all duration-300"
                 >
                   ביטול
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                  className="px-6 py-3 bg-gradient-to-r from-[#6D28D9] to-[#BE185D] text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300"
                 >
                   צור נושא
                 </button>
@@ -837,15 +865,15 @@ export default function TasksPage() {
 
       {/* Epic Tasks Modal - Shows all tasks under an Epic */}
       {showEpicTasksModal && viewingEpic && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl border border-[#6D28D9]/20 animate-modalIn">
+            <div className="flex justify-between items-center mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">{viewingEpic.title}</h2>
+                <h2 className="text-2xl font-bold text-[#2D2A32]">{viewingEpic.title}</h2>
                 {viewingEpic.description && (
-                  <p className="text-gray-600 mt-1">{viewingEpic.description}</p>
+                  <p className="text-[#6B6573] mt-1">{viewingEpic.description}</p>
                 )}
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-sm text-[#6B6573] mt-2">
                   {tasks.filter(t => t.epicId === viewingEpic.id).length} משימות
                 </p>
               </div>
@@ -854,7 +882,7 @@ export default function TasksPage() {
                   setShowEpicTasksModal(false);
                   setViewingEpic(null);
                 }}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
+                className="text-[#6B6573] hover:text-[#2D2A32] text-2xl transition-colors duration-300"
                 title="סגור"
               >
                 ×
@@ -863,7 +891,7 @@ export default function TasksPage() {
 
             <div className="space-y-3 mt-6">
               {tasks.filter(t => t.epicId === viewingEpic.id).length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-[#6B6573]">
                   אין משימות בנושא זה עדיין
                 </div>
               ) : (
@@ -909,19 +937,19 @@ export default function TasksPage() {
                             )}
                             
                             {task.notes && (
-                              <p className="text-xs text-gray-500 mb-2 italic">💬 {task.notes}</p>
+                              <p className="text-xs text-gray-500 mb-2 italic">{task.notes}</p>
                             )}
                             
                             <div className="flex flex-wrap gap-3 text-xs text-gray-500">
                               {task.dueDate && (
                                 <span className="flex items-center gap-1">
-                                  📅 {new Date(task.dueDate).toLocaleDateString('he-IL')}
+                                  {new Date(task.dueDate).toLocaleDateString('he-IL')}
                                 </span>
                               )}
                               <span className="flex items-center gap-1">
-                                {task.priority === 'high' && '🔴 גבוהה'}
-                                {task.priority === 'medium' && '🟡 בינונית'}
-                                {task.priority === 'low' && '🟢 נמוכה'}
+                                {task.priority === 'high' && <><span className="w-2 h-2 rounded-full bg-red-500 inline-block"></span> גבוהה</>}
+                                {task.priority === 'medium' && <><span className="w-2 h-2 rounded-full bg-yellow-500 inline-block"></span> בינונית</>}
+                                {task.priority === 'low' && <><span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span> נמוכה</>}
                               </span>
                             </div>
                           </div>
@@ -945,7 +973,7 @@ export default function TasksPage() {
                                 const icsUrl = `${baseUrl}/api/tasks/${task.id}/ics?${icsParams.toString()}`;
                                 
                                 // Create clean WhatsApp message
-                                const taskTitle = task.title.replace(/[📅📎]/g, '').trim(); // Remove emojis from title
+                                const taskTitle = task.title.trim();
                                 const dateStr = new Date(task.dueDate).toLocaleDateString('he-IL', {
                                   year: 'numeric',
                                   month: '2-digit',
@@ -954,13 +982,13 @@ export default function TasksPage() {
                                 
                                 // Build message parts
                                 let messageParts: string[] = [];
-                                messageParts.push(`📅 ${taskTitle}`);
+                                messageParts.push(taskTitle);
                                 if (task.description) {
                                   messageParts.push(task.description);
                                 }
                                 messageParts.push(`תאריך: ${dateStr}`);
                                 messageParts.push('');
-                                messageParts.push(`📎 הוסף ליומן:`);
+                                messageParts.push(`הוסף ליומן:`);
                                 messageParts.push(icsUrl);
                                 
                                 const message = messageParts.join('\n');
@@ -971,7 +999,7 @@ export default function TasksPage() {
                                   whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
                                 } catch (encodeError) {
                                   // Fallback: use a simpler message if encoding fails
-                                  const simpleMessage = `📅 ${taskTitle}\nתאריך: ${dateStr}\n\n📎 הוסף ליומן:\n${icsUrl}`;
+                                  const simpleMessage = `${taskTitle}\nתאריך: ${dateStr}\n\nהוסף ליומן:\n${icsUrl}`;
                                   whatsappUrl = `https://wa.me/?text=${encodeURIComponent(simpleMessage)}`;
                                 }
                                 
@@ -984,7 +1012,9 @@ export default function TasksPage() {
                             className="text-green-500 hover:text-green-700 p-2"
                             title="שלח לוואטסאפ עם קישור ליומן"
                           >
-                            📱
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                            </svg>
                           </button>
                           <button
                             onClick={() => {
@@ -995,14 +1025,18 @@ export default function TasksPage() {
                             className="text-blue-500 hover:text-blue-700 p-2"
                             title="ערוך"
                           >
-                            ✏️
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
                           </button>
                           <button
                             onClick={() => handleDeleteTask(task.id)}
                             className="text-red-500 hover:text-red-700 p-2"
                             title="מחק"
                           >
-                            🗑️
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                           </button>
                         </div>
                       </div>

@@ -50,7 +50,11 @@ export default function VendorsPage() {
     if (!editingVendor?.id) {
       throw new Error('לא ניתן להעלות חוזה לפני יצירת הספק');
     }
-    return await uploadVendorContract(editingVendor.id, file);
+    const result = await uploadVendorContract(editingVendor.id, file);
+    if (!result) {
+      throw new Error('שגיאה בהעלאת החוזה');
+    }
+    return result;
   };
 
   const handleUpdateVendor = async (vendorData: Omit<Vendor, 'id' | 'createdAt' | 'updatedAt' | 'coupleId'>) => {
@@ -70,14 +74,16 @@ export default function VendorsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-      <header className="bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 shadow-modern">
+    <div className="min-h-screen wedding-bg">
+      <header className="bg-gradient-to-r from-[#6D28D9] via-[#7C3AED] to-[#BE185D] shadow-lg relative z-10">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-white">🎤 ניהול ספקים</h1>
+            <h1 className="text-3xl font-serif font-bold text-white">
+              ניהול ספקים
+            </h1>
             <button
               onClick={() => router.push('/dashboard')}
-              className="px-4 py-2 bg-white text-pink-600 rounded-xl hover:bg-pink-50 font-bold transition-all duration-300"
+              className="px-6 py-3 bg-white/95 text-[#6D28D9] rounded-xl hover:bg-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               ← חזרה לדשבורד
             </button>
@@ -85,30 +91,21 @@ export default function VendorsPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-4 py-8 relative z-10">
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-red-50/50 border border-red-200 rounded-xl">
             <p className="text-red-600">{error}</p>
           </div>
         )}
 
-        {showForm || editingVendor ? (
-          <div className="mb-8">
-            <VendorForm
-              vendor={editingVendor}
-              onSubmit={editingVendor ? handleUpdateVendor : handleAddVendor}
-              onCancel={handleCancel}
-              loading={loading}
-              onContractUpload={editingVendor ? handleContractUpload : undefined}
-            />
-          </div>
-        ) : (
+        {/* Add New Vendor Button - only show when not in add mode */}
+        {!showForm && !editingVendor && (
           <div className="mb-6">
             <button
               onClick={() => setShowForm(true)}
-              className="px-6 py-3 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl font-bold hover:from-pink-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="btn-primary"
             >
-              ➕ הוסף ספק חדש
+              + הוסף ספק חדש
             </button>
           </div>
         )}
@@ -122,6 +119,33 @@ export default function VendorsPage() {
           uploading={uploading}
         />
       </main>
+
+      {/* Modal Overlay for Add/Edit Vendor Form */}
+      {(showForm || editingVendor) && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-[#6D28D9]/20 animate-modalIn">
+            <div className="flex justify-between items-center mb-6 border-b border-[#6D28D9]/20 pb-4">
+              <h2 className="text-2xl font-serif font-bold text-[#2D2A32]">
+                {editingVendor ? 'עריכת ספק' : 'הוספת ספק חדש'}
+              </h2>
+              <button
+                onClick={handleCancel}
+                className="text-[#6B6573] hover:text-[#2D2A32] text-2xl transition-colors duration-300"
+                title="סגור"
+              >
+                ×
+              </button>
+            </div>
+            <VendorForm
+              vendor={editingVendor}
+              onSubmit={editingVendor ? handleUpdateVendor : handleAddVendor}
+              onCancel={handleCancel}
+              loading={loading}
+              onContractUpload={editingVendor ? handleContractUpload : undefined}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

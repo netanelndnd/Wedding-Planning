@@ -4,13 +4,12 @@ import { memo } from 'react';
 
 interface NavigationCard {
   path: string;
-  icon: string;
   title: string;
   description: string;
   color: string;
-  hoverColor: string;
-  borderColor: string;
+  bgImage: string;
   animationDelay: string;
+  icon: JSX.Element;
 }
 
 interface NavigationCardsProps {
@@ -20,88 +19,63 @@ interface NavigationCardsProps {
 /**
  * NavigationCards Component
  * -------------------------
- * Grid of navigation cards for different sections of the app
+ * Grid of navigation cards for different sections of the app with hero backgrounds
  */
 function NavigationCards({ onNavigate }: NavigationCardsProps) {
   const cards: NavigationCard[] = [
     {
       path: '/tasks',
-      icon: '📋',
       title: 'משימות',
-      description: 'ניהול משימות ו-Epics',
-      color: 'pink',
-      hoverColor: 'purple',
-      borderColor: 'pink-300',
+      description: 'ניהול משימות ותכנון',
+      color: '#6D28D9',
+      bgImage: 'linear-gradient(135deg, rgba(109,40,217,0.08) 0%, rgba(190,24,93,0.05) 100%)',
       animationDelay: '0.4s',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+      ),
     },
     {
       path: '/guests',
-      icon: '👥',
       title: 'אורחים',
-      description: 'ניהול רשימת אורחים ו-RSVP',
-      color: 'purple',
-      hoverColor: 'pink',
-      borderColor: 'purple-300',
+      description: 'ניהול רשימת אורחים',
+      color: '#BE185D',
+      bgImage: 'linear-gradient(135deg, rgba(190,24,93,0.08) 0%, rgba(109,40,217,0.05) 100%)',
       animationDelay: '0.5s',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      ),
     },
     {
       path: '/vendors',
-      icon: '🎤',
       title: 'ספקים',
-      description: 'ניהול ספקים וקבלנים',
-      color: 'blue',
-      hoverColor: 'indigo',
-      borderColor: 'blue-300',
+      description: 'ניהול ספקים ותשלומים',
+      color: '#D4AF37',
+      bgImage: 'linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(109,40,217,0.05) 100%)',
       animationDelay: '0.6s',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+      ),
     },
     {
       path: '/timeline',
-      icon: '📅',
       title: 'לוח זמנים',
-      description: 'תכנון זמנים ומילונים',
-      color: 'green',
-      hoverColor: 'teal',
-      borderColor: 'green-300',
+      description: 'תכנון לוח הזמנים',
+      color: '#87A878',
+      bgImage: 'linear-gradient(135deg, rgba(135,168,120,0.08) 0%, rgba(109,40,217,0.05) 100%)',
       animationDelay: '0.7s',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      ),
     },
   ];
-
-  const getCardClasses = (card: NavigationCard) => {
-    const baseClasses = 'group p-8 glass rounded-2xl shadow-modern hover:shadow-modern-hover transition-all duration-300 text-center border-2 border-transparent animate-fadeIn transform hover:-translate-y-1';
-    const borderClasses: Record<string, string> = {
-      'pink-300': 'hover:border-pink-300',
-      'purple-300': 'hover:border-purple-300',
-      'blue-300': 'hover:border-blue-300',
-      'green-300': 'hover:border-green-300',
-    };
-    return `${baseClasses} ${borderClasses[card.borderColor] || ''}`;
-  };
-
-  const getIconClasses = (color: string) => {
-    const colorClasses: Record<string, string> = {
-      pink: 'bg-gradient-to-br from-pink-100 to-pink-200',
-      purple: 'bg-gradient-to-br from-purple-100 to-purple-200',
-      blue: 'bg-gradient-to-br from-blue-100 to-blue-200',
-      green: 'bg-gradient-to-br from-green-100 to-green-200',
-    };
-    return `p-4 ${colorClasses[color] || ''} rounded-2xl inline-block mb-4 group-hover:scale-110 transition-transform duration-300`;
-  };
-
-  const getTextColorClasses = (color: string, hoverColor: string) => {
-    const textColors: Record<string, string> = {
-      pink: 'text-pink-600',
-      purple: 'text-purple-600',
-      blue: 'text-blue-600',
-      green: 'text-green-600',
-    };
-    const hoverColors: Record<string, string> = {
-      purple: 'group-hover:text-purple-600',
-      pink: 'group-hover:text-pink-600',
-      indigo: 'group-hover:text-indigo-600',
-      teal: 'group-hover:text-teal-600',
-    };
-    return `mt-4 ${textColors[color] || ''} font-semibold ${hoverColors[hoverColor] || ''} transition-colors duration-300`;
-  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -109,18 +83,33 @@ function NavigationCards({ onNavigate }: NavigationCardsProps) {
         <button
           key={card.path}
           onClick={() => onNavigate(card.path)}
-          className={getCardClasses(card)}
-          style={{ animationDelay: card.animationDelay }}
+          className="group p-8 glass rounded-2xl shadow-modern card-hover text-right border border-transparent hover:border-[#6D28D9]/20 animate-fadeIn relative overflow-hidden"
+          style={{ 
+            animationDelay: card.animationDelay,
+            background: card.bgImage,
+          }}
         >
-          <div className={getIconClasses(card.color)}>
-            <span className="text-5xl">{card.icon}</span>
-          </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:gradient-text transition-all duration-300">
-            {card.title}
-          </h3>
-          <p className="text-gray-600">{card.description}</p>
-          <div className={getTextColorClasses(card.color, card.hoverColor)}>
-            לחץ לניהול →
+          {/* Hero background overlay */}
+          <div 
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            style={{
+              background: `radial-gradient(circle at 80% 20%, ${card.color}15 0%, transparent 50%)`,
+            }}
+          />
+          
+          <div className="relative z-10">
+            <div 
+              className="p-3 rounded-xl inline-block mb-4 transition-colors duration-300"
+              style={{ backgroundColor: `${card.color}15` }}
+            >
+              <div style={{ color: card.color }}>{card.icon}</div>
+            </div>
+            <h3 
+              className="text-2xl font-serif font-bold text-[#2D2A32] mb-2 group-hover:text-[#6D28D9] transition-colors duration-300"
+            >
+              {card.title}
+            </h3>
+            <p className="text-[#6B6573] font-sans">{card.description}</p>
           </div>
         </button>
       ))}

@@ -165,7 +165,7 @@ export default function VendorForm({ vendor, onSubmit, onCancel, loading, onCont
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-[#2D2A32] mb-2">
             שם הספק *
           </label>
           <input
@@ -174,12 +174,12 @@ export default function VendorForm({ vendor, onSubmit, onCancel, loading, onCont
             value={formData.name}
             onChange={handleChange}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+            className="w-full px-4 py-2 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] bg-white text-[#2D2A32] transition-all duration-300"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-[#2D2A32] mb-2">
             קטגוריה *
           </label>
           <select
@@ -187,7 +187,7 @@ export default function VendorForm({ vendor, onSubmit, onCancel, loading, onCont
             value={formData.category}
             onChange={handleChange}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+            className="w-full px-4 py-2 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] bg-white text-[#2D2A32] transition-all duration-300"
           >
             <option value="">בחר קטגוריה</option>
             {VENDOR_CATEGORIES.map(cat => (
@@ -197,7 +197,7 @@ export default function VendorForm({ vendor, onSubmit, onCancel, loading, onCont
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-[#2D2A32] mb-2">
             טלפון
           </label>
           <input
@@ -205,12 +205,12 @@ export default function VendorForm({ vendor, onSubmit, onCancel, loading, onCont
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+            className="w-full px-4 py-2 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] bg-white text-[#2D2A32] transition-all duration-300"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-[#2D2A32] mb-2">
             אימייל
           </label>
           <input
@@ -218,12 +218,12 @@ export default function VendorForm({ vendor, onSubmit, onCancel, loading, onCont
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+            className="w-full px-4 py-2 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] bg-white text-[#2D2A32] transition-all duration-300"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-[#2D2A32] mb-2">
             אתר
           </label>
           <input
@@ -231,12 +231,12 @@ export default function VendorForm({ vendor, onSubmit, onCancel, loading, onCont
             name="website"
             value={formData.website}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+            className="w-full px-4 py-2 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] bg-white text-[#2D2A32] transition-all duration-300"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-[#2D2A32] mb-2">
             כתובת
           </label>
           <input
@@ -244,12 +244,12 @@ export default function VendorForm({ vendor, onSubmit, onCancel, loading, onCont
             name="address"
             value={formData.address}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+            className="w-full px-4 py-2 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] bg-white text-[#2D2A32] transition-all duration-300"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-[#2D2A32] mb-2">
             מחיר משוער (₪)
           </label>
           <input
@@ -259,12 +259,12 @@ export default function VendorForm({ vendor, onSubmit, onCancel, loading, onCont
             onChange={handleChange}
             min="0"
             step="0.01"
-            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+            className="w-full px-4 py-2 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] bg-white text-[#2D2A32] transition-all duration-300"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-[#2D2A32] mb-2">
             מחיר בפועל (₪)
           </label>
           <input
@@ -274,12 +274,12 @@ export default function VendorForm({ vendor, onSubmit, onCancel, loading, onCont
             onChange={handleChange}
             min="0"
             step="0.01"
-            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+            className="w-full px-4 py-2 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] bg-white text-[#2D2A32] transition-all duration-300"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-[#2D2A32] mb-2">
             דירוג (1-5)
           </label>
           <input
@@ -290,7 +290,7 @@ export default function VendorForm({ vendor, onSubmit, onCancel, loading, onCont
             min="1"
             max="5"
             step="0.1"
-            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+            className="w-full px-4 py-2 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] bg-white text-[#2D2A32] transition-all duration-300"
           />
         </div>
 
@@ -300,16 +300,16 @@ export default function VendorForm({ vendor, onSubmit, onCancel, loading, onCont
             name="isSelected"
             checked={formData.isSelected}
             onChange={handleChange}
-            className="w-5 h-5 text-pink-600 border-gray-300 rounded focus:ring-pink-500"
+            className="w-5 h-5 text-[#6D28D9] border-[#6D28D9]/30 rounded focus:ring-[#6D28D9]"
           />
-          <label className="mr-2 text-sm font-semibold text-gray-700">
+          <label className="mr-2 text-sm font-semibold text-[#2D2A32]">
             ספק נבחר
           </label>
         </div>
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label className="block text-sm font-semibold text-[#2D2A32] mb-2">
           הערות
         </label>
         <textarea
@@ -317,20 +317,22 @@ export default function VendorForm({ vendor, onSubmit, onCancel, loading, onCont
           value={formData.notes}
           onChange={handleChange}
           rows={3}
-          className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+          className="w-full px-4 py-2 border-2 border-[#6D28D9]/20 rounded-xl focus:ring-2 focus:ring-[#6D28D9]/30 focus:border-[#6D28D9] bg-white text-[#2D2A32] transition-all duration-300"
         />
       </div>
 
       {/* Contract Upload Section */}
-      <div className="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
-          📄 חוזה
+      <div className="mb-4 p-4 bg-[#6D28D9]/5 rounded-xl border border-[#6D28D9]/20">
+        <label className="block text-sm font-semibold text-[#2D2A32] mb-2">
+          חוזה
         </label>
         
         {contractUrl ? (
           <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">📎</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+              </svg>
               <div>
                 <p className="font-semibold text-gray-900">{contractFileName || 'חוזה'}</p>
                 <p className="text-sm text-gray-600">חוזה קיים</p>
@@ -362,12 +364,17 @@ export default function VendorForm({ vendor, onSubmit, onCancel, loading, onCont
             >
               {uploadingContract ? (
                 <>
-                  <span className="animate-spin">⏳</span>
+                  <svg className="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
                   <span>מעלה...</span>
                 </>
               ) : (
                 <>
-                  <span>📤</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
                   <span>העלה חוזה</span>
                 </>
               )}
@@ -377,7 +384,7 @@ export default function VendorForm({ vendor, onSubmit, onCancel, loading, onCont
                 הקובץ {contractFile.name} יועלה לאחר שמירת הספק
               </p>
             )}
-            <p className="text-xs text-gray-500 text-center">
+            <p className="text-xs text-[#6B6573] text-center">
               PDF, DOC, DOCX, JPG, PNG (מקסימום 10MB)
             </p>
           </div>
@@ -394,14 +401,14 @@ export default function VendorForm({ vendor, onSubmit, onCancel, loading, onCont
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-2 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 transition-all duration-300"
+          className="px-6 py-2 bg-[#F5F3EF] text-[#2D2A32] rounded-xl font-bold hover:bg-[#E8E5E0] transition-all duration-300 border border-[#6D28D9]/10"
         >
           ביטול
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="px-6 py-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl font-bold hover:from-pink-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2 bg-gradient-to-r from-[#6D28D9] to-[#BE185D] text-white rounded-xl font-bold hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'שומר...' : vendor ? 'עדכן' : 'הוסף'}
         </button>

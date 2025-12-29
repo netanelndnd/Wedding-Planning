@@ -138,37 +138,37 @@ export function useSignupForm() {
       // Create default tasks
       const defaultTasks = [
         {
-          title: '🏛️ הזמנת אולם',
+          title: 'הזמנת אולם',
           description: 'לבחור ולהזמין אולם לחתונה',
           priority: 'high',
           category: 'venue',
         },
         {
-          title: '📸 שכירת צלם',
+          title: 'שכירת צלם',
           description: 'לבחור צלם מקצועי לחתונה',
           priority: 'high',
           category: 'photography',
         },
         {
-          title: '🎵 שכירת תקליטן או זמר',
+          title: 'שכירת תקליטן או זמר',
           description: 'לבחור תקליטן או זמר לחתונה',
           priority: 'medium',
           category: 'entertainment',
         },
         {
-          title: '🕍 תיאום עם רב',
+          title: 'תיאום עם רב',
           description: 'לתאם פגישה עם רב לחתונה',
           priority: 'high',
           category: 'ceremony',
         },
         {
-          title: '👰 קניית שמלת כלה',
+          title: 'קניית שמלת כלה',
           description: 'לבחור ולהזמין שמלת כלה',
           priority: 'high',
           category: 'attire',
         },
         {
-          title: '🤵 קניית חליפת חתן',
+          title: 'קניית חליפת חתן',
           description: 'לבחור ולהזמין חליפה לחתן',
           priority: 'medium',
           category: 'attire',

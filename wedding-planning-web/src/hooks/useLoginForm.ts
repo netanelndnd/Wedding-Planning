@@ -23,7 +23,7 @@ export function useLoginForm() {
   // Check if user just registered
   useEffect(() => {
     if (searchParams.get('registered') === 'true') {
-      setSuccessMessage('ההרשמה הושלמה בהצלחה! 🎉 כעת תוכל להתחבר עם המייל והסיסמה שלך');
+      setSuccessMessage('ההרשמה הושלמה בהצלחה! כעת תוכל להתחבר עם המייל והסיסמה שלך');
       // Clear the URL parameter
       window.history.replaceState({}, '', '/login');
     }

@@ -1,28 +1,106 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Sophisticated Wedding Palette */
+  --background: #FDFBF7;
+  --foreground: #2D2A32;
+  
+  /* Primary Colors */
+  --deep-plum: #6D28D9;
+  --dusty-rose: #BE185D;
+  --champagne-gold: #D4AF37;
+  --sage: #87A878;
+  
+  /* Neutral Tones */
+  --cream: #FDFBF7;
+  --warm-white: #FAF8F5;
+  --soft-gray: #F5F3EF;
+  --muted-text: #6B6573;
+  
+  /* Fonts */
+  --font-heading: var(--font-playfair), "Playfair Display", Georgia, serif;
+  --font-body: var(--font-heebo), var(--font-inter), "Inter", "Heebo", sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-heading);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #1A1820;
+    --foreground: #F5F3EF;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+}
+
+/* Wedding Background with Gemini Image */
+.wedding-bg {
+  background-color: var(--cream);
+  background-image: url('/Gemini_Generated_Image_xtfhygxtfhygxtfh (2).png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  position: relative;
+}
+
+.wedding-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(253, 251, 247, 0.92) 0%, rgba(253, 251, 247, 0.88) 100%);
+  pointer-events: none;
+}
+
+.wedding-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure fixed modals are not affected by wedding-bg styles */
+.wedding-bg > .fixed {
+  position: fixed !important;
+  z-index: 50 !important;
+}
+
+/* Auth Pages Background (Login, Signup, Forgot) */
+.auth-bg {
+  background-color: var(--cream);
+  background-image: url('/Gemini_Generated_Image_xtfhygxtfhygxtfh (2).png');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.auth-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(109, 40, 217, 0.08) 0%, rgba(190, 24, 93, 0.08) 50%, rgba(253, 251, 247, 0.95) 100%);
+  pointer-events: none;
+}
+
+/* Typography System */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.font-serif {
+  font-family: var(--font-heading);
+}
+
+.font-sans {
+  font-family: var(--font-body);
 }
 
 /* Modern Animations */
@@ -59,6 +137,17 @@ body {
   }
 }
 
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
@@ -68,8 +157,21 @@ body {
   }
 }
 
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) skewX(-20deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-20deg);
+  }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.5s ease-out;
+}
+
+.animate-modalIn {
+  animation: modalIn 0.3s ease-out;
 }
 
 .animate-slideInRight {
@@ -86,7 +188,7 @@ body {
 
 /* Gradient Text */
 .gradient-text {
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #BE185D 0%, #6D28D9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -94,19 +196,95 @@ body {
 
 /* Glass Morphism */
 .glass {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(253, 251, 247, 0.95);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(109, 40, 217, 0.08);
 }
 
 /* Modern Shadow */
 .shadow-modern {
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(109, 40, 217, 0.06);
 }
 
 .shadow-modern-hover {
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 20px 25px -5px rgba(109, 40, 217, 0.1), 0 10px 10px -5px rgba(190, 24, 93, 0.04);
+}
+
+/* Card Hover Effect */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: scale(1.02) translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(109, 40, 217, 0.1), 0 10px 10px -5px rgba(190, 24, 93, 0.04);
+}
+
+/* Progress Bar Glow Animation */
+@keyframes progressGlow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(109, 40, 217, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(190, 24, 93, 0.5), 0 0 30px rgba(109, 40, 217, 0.3);
+  }
+}
+
+.progress-glow {
+  animation: progressGlow 2s ease-in-out infinite;
+}
+
+/* Hero Card Background */
+.hero-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.08;
+  transition: opacity 0.3s ease;
+}
+
+.hero-card:hover::before {
+  opacity: 0.12;
+}
+
+/* Sophisticated Button Styles */
+.btn-primary {
+  background: linear-gradient(135deg, #6D28D9 0%, #BE185D 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px 0 rgba(109, 40, 217, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px 0 rgba(109, 40, 217, 0.4);
+}
+
+.btn-secondary {
+  background: rgba(109, 40, 217, 0.08);
+  color: #6D28D9;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(109, 40, 217, 0.2);
+}
+
+.btn-secondary:hover {
+  background: rgba(109, 40, 217, 0.15);
+  transform: translateY(-2px);
 }
 
 /* Accessibility Styles */
