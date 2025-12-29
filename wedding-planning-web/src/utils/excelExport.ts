@@ -1,9 +1,10 @@
 import * as XLSX from 'xlsx';
+import { Task, Vendor, Epic } from '@/types';
 
 /**
  * Excel Export/Import Utilities
  * ------------------------------
- * Functions to export and import guest data to/from Excel files
+ * Functions to export and import data to/from Excel/CSV files
  */
 
 export interface GuestData {
@@ -17,6 +18,237 @@ export interface GuestData {
   tableNumber?: number;
   notes?: string;
 }
+
+/**
+ * Export tasks data to Excel or CSV file
+ */
+export const exportTasksToExcel = (
+  tasks: Task[],
+  epics: Epic[],
+  format: 'xlsx' | 'csv' = 'xlsx',
+  fileName: string = 'דוח_משימות'
+) => {
+  const getEpicTitle = (epicId: string) => epics.find(e => e.id === epicId)?.title || 'כללי';
+  const getPriorityText = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'גבוהה';
+      case 'medium': return 'בינונית';
+      case 'low': return 'נמוכה';
+      default: return priority;
+    }
+  };
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'completed': return 'הושלמה';
+      case 'in-progress': return 'בתהליך';
+      case 'pending': return 'ממתינה';
+      case 'cancelled': return 'בוטלה';
+      default: return status;
+    }
+  };
+
+  const data = tasks.map(task => ({
+    'כותרת': task.title,
+    'תיאור': task.description || '',
+    'נושא': getEpicTitle(task.epicId),
+    'עדיפות': getPriorityText(task.priority),
+    'סטטוס': getStatusText(task.status),
+    'תאריך יעד': task.dueDate ? new Date(task.dueDate).toLocaleDateString('he-IL') : '',
+    'תאריך השלמה': task.completedAt ? new Date(task.completedAt).toLocaleDateString('he-IL') : '',
+    'הערות': task.notes || '',
+    'תאריך יצירה': new Date(task.createdAt).toLocaleDateString('he-IL'),
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  worksheet['!cols'] = [
+    { wch: 30 }, // כותרת
+    { wch: 40 }, // תיאור
+    { wch: 15 }, // נושא
+    { wch: 12 }, // עדיפות
+    { wch: 12 }, // סטטוס
+    { wch: 15 }, // תאריך יעד
+    { wch: 15 }, // תאריך השלמה
+    { wch: 30 }, // הערות
+    { wch: 15 }, // תאריך יצירה
+  ];
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'משימות');
+
+  // Add summary sheet
+  const completed = tasks.filter(t => t.status === 'completed').length;
+  const inProgress = tasks.filter(t => t.status === 'in-progress').length;
+  const pending = tasks.filter(t => t.status === 'pending').length;
+  
+  const summary = [
+    ['סיכום משימות'],
+    [''],
+    ['סה"כ משימות', tasks.length],
+    ['הושלמו', completed],
+    ['בתהליך', inProgress],
+    ['ממתינות', pending],
+    ['אחוז השלמה', `${tasks.length > 0 ? Math.round((completed / tasks.length) * 100) : 0}%`],
+    [''],
+    ['לפי עדיפות:'],
+    ['גבוהה', tasks.filter(t => t.priority === 'high').length],
+    ['בינונית', tasks.filter(t => t.priority === 'medium').length],
+    ['נמוכה', tasks.filter(t => t.priority === 'low').length],
+  ];
+  
+  const summaryWs = XLSX.utils.aoa_to_sheet(summary);
+  summaryWs['!cols'] = [{ wch: 20 }, { wch: 15 }];
+  XLSX.utils.book_append_sheet(workbook, summaryWs, 'סיכום');
+
+  XLSX.writeFile(workbook, `${fileName}.${format}`);
+};
+
+/**
+ * Export vendors data to Excel or CSV file
+ */
+export const exportVendorsToExcel = (
+  vendors: Vendor[],
+  format: 'xlsx' | 'csv' = 'xlsx',
+  fileName: string = 'דוח_ספקים'
+) => {
+  const data = vendors.map(vendor => ({
+    'שם הספק': vendor.name,
+    'קטגוריה': vendor.category,
+    'טלפון': vendor.phone || '',
+    'אימייל': vendor.email || '',
+    'אתר': vendor.website || '',
+    'כתובת': vendor.address || '',
+    'מחיר משוער': vendor.price ? `₪${vendor.price.toLocaleString()}` : '',
+    'מחיר בפועל': vendor.actualPrice ? `₪${vendor.actualPrice.toLocaleString()}` : '',
+    'נבחר': vendor.isSelected ? 'כן' : 'לא',
+    'דירוג': vendor.rating ? `${vendor.rating}/5` : '',
+    'הערות': vendor.notes || '',
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  worksheet['!cols'] = [
+    { wch: 25 }, // שם
+    { wch: 15 }, // קטגוריה
+    { wch: 15 }, // טלפון
+    { wch: 25 }, // אימייל
+    { wch: 25 }, // אתר
+    { wch: 30 }, // כתובת
+    { wch: 15 }, // מחיר משוער
+    { wch: 15 }, // מחיר בפועל
+    { wch: 10 }, // נבחר
+    { wch: 10 }, // דירוג
+    { wch: 30 }, // הערות
+  ];
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'ספקים');
+
+  // Add budget summary
+  const selectedVendors = vendors.filter(v => v.isSelected);
+  const totalEstimated = selectedVendors.reduce((sum, v) => sum + (v.price || 0), 0);
+  const totalActual = selectedVendors.reduce((sum, v) => sum + (v.actualPrice || 0), 0);
+  
+  const summary = [
+    ['סיכום ספקים ותקציב'],
+    [''],
+    ['סה"כ ספקים', vendors.length],
+    ['ספקים שנבחרו', selectedVendors.length],
+    [''],
+    ['תקציב:'],
+    ['סה"כ מחיר משוער', `₪${totalEstimated.toLocaleString()}`],
+    ['סה"כ מחיר בפועל', `₪${totalActual.toLocaleString()}`],
+    ['הפרש', `₪${(totalEstimated - totalActual).toLocaleString()}`],
+    [''],
+    ['לפי קטגוריה:'],
+  ];
+
+  // Group by category
+  const categories = [...new Set(vendors.map(v => v.category))];
+  categories.forEach(cat => {
+    const catVendors = vendors.filter(v => v.category === cat && v.isSelected);
+    const catTotal = catVendors.reduce((sum, v) => sum + (v.actualPrice || v.price || 0), 0);
+    summary.push([cat, `₪${catTotal.toLocaleString()}`]);
+  });
+
+  const summaryWs = XLSX.utils.aoa_to_sheet(summary);
+  summaryWs['!cols'] = [{ wch: 25 }, { wch: 20 }];
+  XLSX.utils.book_append_sheet(workbook, summaryWs, 'סיכום תקציב');
+
+  XLSX.writeFile(workbook, `${fileName}.${format}`);
+};
+
+/**
+ * Export budget report to Excel or CSV file
+ */
+export const exportBudgetToExcel = (
+  vendors: Vendor[],
+  budget: number,
+  format: 'xlsx' | 'csv' = 'xlsx',
+  fileName: string = 'דוח_תקציב'
+) => {
+  try {
+    // Use all vendors with prices (not just selected)
+    const vendorsWithPrices = vendors.filter(v => v.price || v.actualPrice);
+    const totalSpent = vendorsWithPrices.reduce((sum, v) => sum + (v.actualPrice || v.price || 0), 0);
+    const remaining = budget - totalSpent;
+
+    // Expense details - include all vendors
+    const expenses = vendorsWithPrices.length > 0 
+      ? vendorsWithPrices.map(vendor => ({
+          'קטגוריה': vendor.category,
+          'ספק': vendor.name,
+          'נבחר': vendor.isSelected ? 'כן' : 'לא',
+          'מחיר משוער': vendor.price || 0,
+          'מחיר בפועל': vendor.actualPrice || vendor.price || 0,
+          'הפרש': (vendor.price || 0) - (vendor.actualPrice || vendor.price || 0),
+        }))
+      : [{ 'קטגוריה': 'אין נתונים', 'ספק': '', 'נבחר': '', 'מחיר משוער': 0, 'מחיר בפועל': 0, 'הפרש': 0 }];
+
+    const worksheet = XLSX.utils.json_to_sheet(expenses);
+    worksheet['!cols'] = [
+      { wch: 20 }, // קטגוריה
+      { wch: 25 }, // ספק
+      { wch: 10 }, // נבחר
+      { wch: 15 }, // מחיר משוער
+      { wch: 15 }, // מחיר בפועל
+      { wch: 15 }, // הפרש
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'הוצאות');
+
+    // Summary
+    const summary = [
+      ['דוח תקציב חתונה'],
+      [''],
+      ['תקציב כולל', `₪${budget.toLocaleString()}`],
+      ['סה"כ הוצאות', `₪${totalSpent.toLocaleString()}`],
+      ['נותר', `₪${remaining.toLocaleString()}`],
+      ['אחוז ניצול', `${budget > 0 ? Math.round((totalSpent / budget) * 100) : 0}%`],
+      [''],
+      ['סה"כ ספקים', vendors.length.toString()],
+      [''],
+      ['פירוט לפי קטגוריה:'],
+    ];
+
+    // Group by category
+    const categories = [...new Set(vendorsWithPrices.map(v => v.category))];
+    categories.forEach(cat => {
+      const catVendors = vendorsWithPrices.filter(v => v.category === cat);
+      const catTotal = catVendors.reduce((sum, v) => sum + (v.actualPrice || v.price || 0), 0);
+      const percentage = budget > 0 ? Math.round((catTotal / budget) * 100) : 0;
+      summary.push([cat, `₪${catTotal.toLocaleString()} (${percentage}%)`]);
+    });
+
+    const summaryWs = XLSX.utils.aoa_to_sheet(summary);
+    summaryWs['!cols'] = [{ wch: 25 }, { wch: 25 }];
+    XLSX.utils.book_append_sheet(workbook, summaryWs, 'סיכום');
+
+    XLSX.writeFile(workbook, `${fileName}.${format}`);
+  } catch (error) {
+    console.error('Error exporting budget:', error);
+    alert('שגיאה בייצוא דוח התקציב');
+  }
+};
 
 /**
  * Export guests data to Excel file

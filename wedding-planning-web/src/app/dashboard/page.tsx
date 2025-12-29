@@ -23,6 +23,7 @@ function DashboardPage() {
     loading,
     couple,
     tasks,
+    vendors,
     daysUntilWedding,
     completedCount,
     pendingCount,
@@ -55,6 +56,7 @@ function DashboardPage() {
           totalExpenses={expenses.total}
           expensesByCategory={expenses.byCategory}
           vendorCount={expenses.vendorCount}
+          vendors={vendors}
         />
 
         <ProgressBar

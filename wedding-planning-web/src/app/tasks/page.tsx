@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { taskService, epicService } from '@/services/firestoreService';
 import { Task, Epic, Priority, TaskStatus } from '@/types';
+import { exportTasksToExcel } from '@/utils/excelExport';
 
 type FilterType = 'all' | 'pending' | 'in-progress' | 'completed';
 type SortType = 'priority' | 'dueDate' | 'created';
@@ -40,6 +41,11 @@ export default function TasksPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  
+  // Export dropdown
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
+  const exportButtonRef = useRef<HTMLButtonElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   
   // New Task Form State
   const [newTask, setNewTask] = useState({
@@ -361,16 +367,37 @@ export default function TasksPage() {
   return (
     <div className="min-h-screen wedding-bg" dir="rtl">
       {/* Header */}
-      <header className="bg-gradient-to-r from-[#6D28D9] via-[#7C3AED] to-[#BE185D] shadow-lg relative z-10">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
+      <header className="bg-gradient-to-r from-[#6D28D9] via-[#7C3AED] to-[#BE185D] shadow-lg relative z-20 overflow-visible">
+        <div className="max-w-6xl mx-auto px-4 py-6 overflow-visible">
+          <div className="flex justify-between items-center overflow-visible">
             <div>
               <h1 className="text-3xl font-serif font-bold text-white">
                 ניהול משימות
               </h1>
               <p className="text-white/80 mt-1 font-sans">{filteredTasks.length} משימות</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 overflow-visible">
+              <div className="relative">
+                <button
+                  ref={exportButtonRef}
+                  onClick={() => {
+                    if (exportButtonRef.current) {
+                      const rect = exportButtonRef.current.getBoundingClientRect();
+                      setDropdownPosition({ top: rect.bottom + 8, left: rect.left });
+                    }
+                    setShowExportDropdown(!showExportDropdown);
+                  }}
+                  className="px-4 py-2.5 bg-white/20 backdrop-blur text-white rounded-xl hover:bg-white/30 font-semibold transition-all duration-300 flex items-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                  </svg>
+                  ייצוא
+                  <svg xmlns="http://www.w3.org/2000/svg" className={`w-4 h-4 transition-transform ${showExportDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
               <button
                 onClick={() => setShowManageEpicsModal(true)}
                 className="px-4 py-2.5 bg-white/20 backdrop-blur text-white rounded-xl hover:bg-white/30 font-semibold transition-all duration-300"
@@ -394,7 +421,7 @@ export default function TasksPage() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6 relative z-10">
+      <main className="max-w-6xl mx-auto px-4 py-6 relative">
         {/* Filters and Search */}
         <div className="glass rounded-2xl shadow-modern p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -1284,6 +1311,45 @@ export default function TasksPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Export Dropdown Modal */}
+      {showExportDropdown && (
+        <>
+          <div className="fixed inset-0 z-[9999]" onClick={() => setShowExportDropdown(false)} />
+          <div 
+            className="fixed w-48 bg-white rounded-xl shadow-2xl border border-[#6D28D9]/20 overflow-hidden z-[10000]"
+            style={{ top: dropdownPosition.top, left: dropdownPosition.left }}
+          >
+            <div className="p-2 bg-gradient-to-r from-[#6D28D9] to-[#BE185D] text-white text-center font-semibold text-sm">
+              ייצוא משימות
+            </div>
+            <button
+              onClick={() => {
+                exportTasksToExcel(tasks, epics, 'xlsx');
+                setShowExportDropdown(false);
+              }}
+              className="w-full px-4 py-3 text-right text-[#2D2A32] hover:bg-[#6D28D9]/10 transition-colors font-medium flex items-center gap-3 justify-end"
+            >
+              <span>Excel (.xlsx)</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </button>
+            <button
+              onClick={() => {
+                exportTasksToExcel(tasks, epics, 'csv');
+                setShowExportDropdown(false);
+              }}
+              className="w-full px-4 py-3 text-right text-[#2D2A32] hover:bg-[#6D28D9]/10 transition-colors font-medium border-t border-gray-100 flex items-center gap-3 justify-end"
+            >
+              <span>CSV (.csv)</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

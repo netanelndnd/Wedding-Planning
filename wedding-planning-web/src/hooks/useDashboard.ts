@@ -78,6 +78,7 @@ export function useDashboard() {
     loading: loading || tasksLoading,
     couple,
     tasks,
+    vendors,
     daysUntilWedding,
     completedCount,
     pendingCount,
