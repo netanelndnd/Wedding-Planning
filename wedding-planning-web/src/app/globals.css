@@ -42,10 +42,10 @@ body {
   font-family: var(--font-body);
 }
 
-/* Wedding Background with Gemini Image */
+/* Wedding Background */
 .wedding-bg {
   background-color: var(--cream);
-  background-image: url('/Gemini_Generated_Image_xtfhygxtfhygxtfh (2).png');
+  background-image: url('/background.png');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -56,7 +56,7 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(253, 251, 247, 0.92) 0%, rgba(253, 251, 247, 0.88) 100%);
+  background: linear-gradient(135deg, rgba(253, 251, 247, 0.75) 0%, rgba(253, 251, 247, 0.70) 100%);
   pointer-events: none;
 }
 
@@ -74,7 +74,7 @@ body {
 /* Auth Pages Background (Login, Signup, Forgot) */
 .auth-bg {
   background-color: var(--cream);
-  background-image: url('/Gemini_Generated_Image_xtfhygxtfhygxtfh (2).png');
+  background-image: url('/background.png');
   background-size: cover;
   background-position: center;
   position: relative;
@@ -84,7 +84,7 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(109, 40, 217, 0.08) 0%, rgba(190, 24, 93, 0.08) 50%, rgba(253, 251, 247, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(109, 40, 217, 0.08) 0%, rgba(190, 24, 93, 0.08) 50%, rgba(253, 251, 247, 0.75) 100%);
   pointer-events: none;
 }
 

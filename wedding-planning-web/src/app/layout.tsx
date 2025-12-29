@@ -23,6 +23,11 @@ const heebo = Heebo({
 export const metadata: Metadata = {
   title: "תכנון החתונה - Wedding Planner",
   description: "מערכת חכמה לניהול ותכנון חתונות",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

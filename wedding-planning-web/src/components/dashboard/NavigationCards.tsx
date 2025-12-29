@@ -83,17 +83,19 @@ function NavigationCards({ onNavigate }: NavigationCardsProps) {
         <button
           key={card.path}
           onClick={() => onNavigate(card.path)}
-          className="group p-8 glass rounded-2xl shadow-modern card-hover text-right border border-transparent hover:border-[#6D28D9]/20 animate-fadeIn relative overflow-hidden"
+          className="group p-8 rounded-2xl shadow-lg card-hover text-right border-2 hover:border-[#6D28D9]/40 animate-fadeIn relative overflow-hidden transition-all duration-300"
           style={{ 
             animationDelay: card.animationDelay,
-            background: card.bgImage,
+            background: `linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%)`,
+            borderColor: `${card.color}40`,
+            boxShadow: `0 4px 20px ${card.color}15, 0 2px 8px rgba(0,0,0,0.08)`,
           }}
         >
           {/* Hero background overlay */}
           <div 
-            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            className="absolute inset-0 opacity-30 group-hover:opacity-50 transition-opacity duration-500"
             style={{
-              background: `radial-gradient(circle at 80% 20%, ${card.color}15 0%, transparent 50%)`,
+              background: `radial-gradient(circle at 80% 20%, ${card.color}30 0%, transparent 50%)`,
             }}
           />
           

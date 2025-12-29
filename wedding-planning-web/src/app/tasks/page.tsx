@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { taskService, epicService } from '@/services/firestoreService';
@@ -8,6 +8,7 @@ import { Task, Epic, Priority, TaskStatus } from '@/types';
 
 type FilterType = 'all' | 'pending' | 'in-progress' | 'completed';
 type SortType = 'priority' | 'dueDate' | 'created';
+type ViewMode = 'list' | 'calendar';
 
 export default function TasksPage() {
   const { user, loading: authLoading } = useAuth();
@@ -34,6 +35,11 @@ export default function TasksPage() {
   const [filterStatus, setFilterStatus] = useState<FilterType>('all');
   const [filterEpic, setFilterEpic] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortType>('priority');
+  
+  // View mode and calendar state
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   
   // New Task Form State
   const [newTask, setNewTask] = useState({
@@ -250,6 +256,74 @@ export default function TasksPage() {
 
   const filteredTasks = getFilteredAndSortedTasks();
 
+  // Calendar data - group tasks by date for the selected month
+  const calendarData = useMemo(() => {
+    const year = selectedYear;
+    const month = selectedMonth;
+    
+    // Get first and last day of month
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    // Get the day of week for first day (0 = Sunday, 6 = Saturday)
+    // For Hebrew calendar, we want Saturday as first day
+    const startDayOfWeek = firstDay.getDay();
+    
+    // Create calendar grid
+    const days: { date: Date | null; tasks: Task[] }[] = [];
+    
+    // Add empty slots for days before the first of the month
+    for (let i = 0; i < startDayOfWeek; i++) {
+      days.push({ date: null, tasks: [] });
+    }
+    
+    // Add days of the month
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+      const date = new Date(year, month, day);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      const dayTasks = filteredTasks.filter(task => {
+        if (!task.dueDate) return false;
+        const taskDate = new Date(task.dueDate).toISOString().split('T')[0];
+        return taskDate === dateStr;
+      });
+      
+      days.push({ date, tasks: dayTasks });
+    }
+    
+    return days;
+  }, [filteredTasks, selectedMonth, selectedYear]);
+
+  const goToPrevMonth = () => {
+    if (selectedMonth === 0) {
+      setSelectedMonth(11);
+      setSelectedYear(selectedYear - 1);
+    } else {
+      setSelectedMonth(selectedMonth - 1);
+    }
+  };
+
+  const goToNextMonth = () => {
+    if (selectedMonth === 11) {
+      setSelectedMonth(0);
+      setSelectedYear(selectedYear + 1);
+    } else {
+      setSelectedMonth(selectedMonth + 1);
+    }
+  };
+
+  const goToToday = () => {
+    const today = new Date();
+    setSelectedMonth(today.getMonth());
+    setSelectedYear(today.getFullYear());
+  };
+
+  const isToday = (date: Date | null) => {
+    if (!date) return false;
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+
   const getPriorityColor = (priority: Priority) => {
     switch (priority) {
       case 'high': return 'border-red-500 bg-red-50';
@@ -366,9 +440,160 @@ export default function TasksPage() {
               <option value="created">מיין לפי תאריך יצירה</option>
             </select>
           </div>
+
+          {/* View Mode Toggle */}
+          <div className="flex items-center gap-4 mt-4 pt-4 border-t border-[#6D28D9]/10">
+            <span className="text-[#2D2A32] font-semibold font-sans">תצוגה:</span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
+                  viewMode === 'list'
+                    ? 'bg-gradient-to-r from-[#6D28D9] to-[#BE185D] text-white shadow-lg'
+                    : 'bg-white text-[#6B6573] hover:bg-[#6D28D9]/5 border border-[#6D28D9]/20'
+                }`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+                רשימה
+              </button>
+              <button
+                onClick={() => setViewMode('calendar')}
+                className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
+                  viewMode === 'calendar'
+                    ? 'bg-gradient-to-r from-[#6D28D9] to-[#BE185D] text-white shadow-lg'
+                    : 'bg-white text-[#6B6573] hover:bg-[#6D28D9]/5 border border-[#6D28D9]/20'
+                }`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                </svg>
+                לוח שנה
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Tasks Grid */}
+        {/* Calendar View */}
+        {viewMode === 'calendar' && (
+          <div className="glass rounded-2xl shadow-modern p-6 mb-6">
+            {/* Calendar Header */}
+            <div className="flex items-center justify-between mb-6">
+              <button
+                onClick={goToPrevMonth}
+                className="p-2 rounded-xl hover:bg-[#6D28D9]/10 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-[#6D28D9]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              
+              <div className="flex items-center gap-4">
+                <h2 className="text-2xl font-serif font-bold text-[#2D2A32]">
+                  {new Date(selectedYear, selectedMonth).toLocaleDateString('he-IL', { month: 'long', year: 'numeric' })}
+                </h2>
+                <button
+                  onClick={goToToday}
+                  className="px-3 py-1 text-sm bg-[#6D28D9]/10 text-[#6D28D9] rounded-lg hover:bg-[#6D28D9]/20 transition-colors font-semibold"
+                >
+                  היום
+                </button>
+              </div>
+              
+              <button
+                onClick={goToNextMonth}
+                className="p-2 rounded-xl hover:bg-[#6D28D9]/10 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-[#6D28D9]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Day Names */}
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'].map((day) => (
+                <div key={day} className="text-center font-semibold text-[#6B6573] py-2">
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            {/* Calendar Grid */}
+            <div className="grid grid-cols-7 gap-1">
+              {calendarData.map((day, index) => (
+                <div
+                  key={index}
+                  className={`min-h-[100px] p-2 rounded-xl border-2 transition-all ${
+                    day.date
+                      ? isToday(day.date)
+                        ? 'bg-gradient-to-br from-[#6D28D9]/10 to-[#BE185D]/10 border-[#6D28D9]'
+                        : day.tasks.length > 0
+                        ? 'bg-white border-[#6D28D9]/30 hover:border-[#6D28D9]'
+                        : 'bg-white/50 border-transparent hover:border-[#6D28D9]/20'
+                      : 'bg-gray-50/50 border-transparent'
+                  }`}
+                >
+                  {day.date && (
+                    <>
+                      <div className={`text-sm font-semibold mb-1 ${isToday(day.date) ? 'text-[#6D28D9]' : 'text-[#2D2A32]'}`}>
+                        {day.date.getDate()}
+                      </div>
+                      <div className="space-y-1">
+                        {day.tasks.slice(0, 3).map((task) => (
+                          <button
+                            key={task.id}
+                            onClick={() => {
+                              setEditingTask(task);
+                              setShowEditTaskModal(true);
+                            }}
+                            className={`w-full text-right text-xs p-1 rounded truncate transition-colors ${
+                              task.status === 'completed'
+                                ? 'bg-green-100 text-green-700 line-through'
+                                : task.priority === 'high'
+                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                : task.priority === 'medium'
+                                ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                                : 'bg-[#6D28D9]/10 text-[#6D28D9] hover:bg-[#6D28D9]/20'
+                            }`}
+                            title={task.title}
+                          >
+                            {task.title}
+                          </button>
+                        ))}
+                        {day.tasks.length > 3 && (
+                          <div className="text-xs text-[#6B6573] text-center">
+                            +{day.tasks.length - 3} עוד
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-[#6D28D9]/10">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-red-100 border border-red-300"></div>
+                <span className="text-sm text-[#6B6573]">עדיפות גבוהה</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-yellow-100 border border-yellow-300"></div>
+                <span className="text-sm text-[#6B6573]">עדיפות בינונית</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-green-100 border border-green-300"></div>
+                <span className="text-sm text-[#6B6573]">הושלמה</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tasks Grid - List View */}
+        {viewMode === 'list' && (
         <div className="grid gap-4">
           {filteredTasks.length === 0 ? (
             <div className="text-center py-10 bg-white rounded-lg shadow text-gray-500">
@@ -537,6 +762,7 @@ export default function TasksPage() {
             ))
           )}
         </div>
+        )}
       </main>
 
       {/* Add Task Modal */}
