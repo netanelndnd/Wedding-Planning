@@ -108,3 +108,57 @@ body {
 .shadow-modern-hover {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
+
+/* Accessibility Styles */
+
+/* Negative/High Contrast Mode */
+.accessibility-negative {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.accessibility-negative img,
+.accessibility-negative video,
+.accessibility-negative picture,
+.accessibility-negative svg {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Large Font Mode */
+.accessibility-large-font {
+  font-size: 125% !important;
+}
+
+.accessibility-large-font body {
+  font-size: 1.25rem !important;
+  line-height: 1.6 !important;
+}
+
+.accessibility-large-font h1 {
+  font-size: 2.5rem !important;
+}
+
+.accessibility-large-font h2 {
+  font-size: 2rem !important;
+}
+
+.accessibility-large-font h3 {
+  font-size: 1.75rem !important;
+}
+
+.accessibility-large-font p,
+.accessibility-large-font span,
+.accessibility-large-font li,
+.accessibility-large-font td,
+.accessibility-large-font th,
+.accessibility-large-font label,
+.accessibility-large-font button,
+.accessibility-large-font input,
+.accessibility-large-font textarea,
+.accessibility-large-font select {
+  font-size: 1.15rem !important;
+  line-height: 1.6 !important;
+}
+
+.accessibility-large-font small {
+  font-size: 1rem !important;
+}
