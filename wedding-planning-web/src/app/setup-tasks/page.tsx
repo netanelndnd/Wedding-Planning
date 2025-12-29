@@ -361,7 +361,7 @@ export default function SetupTasksPage() {
               onClick={() => router.push('/dashboard')}
               className="text-gray-600 hover:text-gray-900 font-semibold transition-colors"
             >
-              ← חזור לדשבורד
+              ← חזרה
             </button>
           </div>
         </div>

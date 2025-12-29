@@ -174,9 +174,9 @@ export default function TimelinePage() {
             </div>
             <button
               onClick={() => router.push('/dashboard')}
-              className="px-6 py-3 bg-white/95 text-[#6D28D9] rounded-xl hover:bg-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="px-4 py-2.5 bg-white/95 text-[#6D28D9] rounded-xl hover:bg-white font-semibold transition-all duration-300 shadow-lg"
             >
-              ← חזור לדשבורד
+              ← חזרה
             </button>
           </div>
         </div>
