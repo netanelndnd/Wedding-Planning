@@ -396,4 +396,79 @@ export const guestService = {
     if (isMockMode) return;
     await deleteDoc(doc(db, 'guests', guestId));
   },
+
+  // Batch add multiple guests (for Excel import)
+  async addGuestsBatch(coupleId: string, guests: Omit<Guest, 'id' | 'createdAt' | 'updatedAt' | 'coupleId'>[]) {
+    if (isMockMode) return [];
+    
+    const guestsCollection = collection(db, 'guests');
+    const addedIds: string[] = [];
+
+    // Firestore batches have a 500 operation limit, so we chunk
+    const chunkSize = 450;
+    for (let i = 0; i < guests.length; i += chunkSize) {
+      const chunk = guests.slice(i, i + chunkSize);
+      const batch = writeBatch(db);
+      
+      for (const guest of chunk) {
+        const docRef = doc(guestsCollection);
+        const cleanGuest: any = {
+          coupleId,
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
+        };
+        
+        Object.keys(guest).forEach(key => {
+          const value = (guest as any)[key];
+          if (value !== undefined) {
+            cleanGuest[key] = value;
+          }
+        });
+        
+        batch.set(docRef, cleanGuest);
+        addedIds.push(docRef.id);
+      }
+      
+      await batch.commit();
+    }
+
+    return addedIds;
+  },
+
+  // Delete all guests for a couple (for replacing with new import)
+  async deleteAllGuests(coupleId: string) {
+    if (isMockMode) return;
+    
+    const q = query(collection(db, 'guests'), where('coupleId', '==', coupleId));
+    const snapshot = await getDocs(q);
+    
+    // Chunk deletes to avoid batch limit
+    const chunkSize = 450;
+    const docs = snapshot.docs;
+    
+    for (let i = 0; i < docs.length; i += chunkSize) {
+      const chunk = docs.slice(i, i + chunkSize);
+      const batch = writeBatch(db);
+      chunk.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+    }
+  },
+
+  // Get all guests (one-time fetch)
+  async getGuests(coupleId: string): Promise<Guest[]> {
+    if (isMockMode) return [];
+    
+    const q = query(collection(db, 'guests'), where('coupleId', '==', coupleId));
+    const snapshot = await getDocs(q);
+    
+    return snapshot.docs.map(d => {
+      const data = d.data();
+      return {
+        ...data,
+        id: d.id,
+        createdAt: data.createdAt?.toDate?.() || data.createdAt,
+        updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+      } as Guest;
+    });
+  },
 };
