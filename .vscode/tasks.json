@@ -51,6 +51,18 @@
       "presentation": {
         "reveal": "always"
       }
+    },
+    {
+      "label": "Claude (mintty external, RTL)",
+      "type": "process",
+      "command": "C:\\Program Files\\Git\\usr\\bin\\mintty.exe",
+      "args": [
+        "--title", "claude",
+        "/usr/bin/bash",
+        "-lc",
+        "exec claude"
+      ],
+      "problemMatcher": []
     }
   ]
 }

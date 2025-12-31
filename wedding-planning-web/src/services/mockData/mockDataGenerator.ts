@@ -193,7 +193,7 @@ export function generateMockTasks(coupleId: string, epics: Epic[], count: number
       priority: template.priority,
       status,
       dueDate,
-      completedAt: status === 'completed' ? new Date() : undefined,
+      completedAt: status === 'completed' ? new Date() : null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -222,7 +222,7 @@ export function generateMockGuests(coupleId: string, count: number = 50): Guest[
       relationship: GUEST_RELATIONSHIPS[Math.floor(Math.random() * GUEST_RELATIONSHIPS.length)],
       plusOne: Math.floor(Math.random() * 3),
       rsvpStatus,
-      notes: Math.random() > 0.8 ? 'צמחוני' : undefined,
+      notes: Math.random() > 0.8 ? 'צמחוני' : '',
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -247,10 +247,10 @@ export function generateMockVendors(coupleId: string, count: number = 8): Vendor
       phone: generatePhone(),
       email: generateEmail(vendorName),
       price,
-      actualPrice: Math.random() > 0.5 ? price + Math.floor(Math.random() * 2000) - 1000 : undefined,
+      actualPrice: Math.random() > 0.5 ? price + Math.floor(Math.random() * 2000) - 1000 : null,
       rating: Math.floor(Math.random() * 3) + 3, // 3-5 כוכבים
       isSelected: Math.random() > 0.5,
-      notes: Math.random() > 0.7 ? 'הערות על הספק' : undefined,
+      notes: Math.random() > 0.7 ? 'הערות על הספק' : '',
       createdAt: new Date(),
       updatedAt: new Date(),
     };

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { insertMockData, MockDataInsertResult } from '@/services/mockData';
+import { insertMockData, deleteAllData, MockDataInsertResult, DeleteDataResult } from '@/services/mockData';
 
 /**
  * useLoginForm Hook
@@ -19,6 +19,8 @@ export function useLoginForm() {
   const [successMessage, setSuccessMessage] = useState('');
   const [insertingMockData, setInsertingMockData] = useState(false);
   const [mockDataResult, setMockDataResult] = useState<MockDataInsertResult | null>(null);
+  const [deletingData, setDeletingData] = useState(false);
+  const [deleteDataResult, setDeleteDataResult] = useState<DeleteDataResult | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isMockMode, mockLogin, user } = useAuth();
@@ -68,17 +70,41 @@ export function useLoginForm() {
 
   // Insert mock data handler
   const handleInsertMockData = useCallback(async () => {
-    if (!user?.uid) {
-      setError('יש להתחבר תחילה כדי להכניס נתוני דוגמה');
-      return;
-    }
-
     setInsertingMockData(true);
     setError('');
     setMockDataResult(null);
 
     try {
-      const result = await insertMockData(user.uid, {
+      let userId = user?.uid;
+
+      // If not logged in, create test user first
+      if (!userId) {
+        const [{ createUserWithEmailAndPassword, signInWithEmailAndPassword }, { auth }] = await Promise.all([
+          import('firebase/auth'),
+          import('@/lib/firebase')
+        ]);
+
+        const testEmail = 'test@example.com';
+        const testPassword = 'password123';
+
+        try {
+          // Try to create the user
+          const userCredential = await createUserWithEmailAndPassword(auth, testEmail, testPassword);
+          userId = userCredential.user.uid;
+          console.log('✅ Test user created');
+        } catch (createError: any) {
+          // If user already exists, try to sign in
+          if (createError.code === 'auth/email-already-in-use') {
+            const userCredential = await signInWithEmailAndPassword(auth, testEmail, testPassword);
+            userId = userCredential.user.uid;
+            console.log('✅ Signed in with existing test user');
+          } else {
+            throw createError;
+          }
+        }
+      }
+
+      const result = await insertMockData(userId, {
         guestCount: 50,
         vendorCount: 8,
         taskCount: 12,
@@ -87,7 +113,7 @@ export function useLoginForm() {
 
       if (result.success && result.data) {
         setMockDataResult(result.data);
-        setSuccessMessage(`נתוני דוגמה הוכנסו בהצלחה! ${result.data.guestsInserted} אורחים, ${result.data.vendorsInserted} ספקים, ${result.data.tasksInserted} משימות`);
+        setSuccessMessage(`נתוני דוגמה הוכנסו בהצלחה! ${result.data.guestsCreated} אורחים, ${result.data.vendorsCreated} ספקים, ${result.data.tasksCreated} משימות`);
       } else {
         setError(result.error || 'שגיאה בהכנסת נתוני דוגמה');
       }
@@ -97,6 +123,41 @@ export function useLoginForm() {
       setInsertingMockData(false);
     }
   }, [user]);
+
+  // Delete all data handler
+  const handleDeleteAllData = useCallback(async () => {
+    if (!user?.uid) {
+      setError('יש להתחבר תחילה');
+      return;
+    }
+
+    if (!window.confirm('האם אתה בטוח? כל הנתונים ימחקו כולל המשתמש!')) {
+      return;
+    }
+
+    setDeletingData(true);
+    setError('');
+    setDeleteDataResult(null);
+
+    try {
+      const result = await deleteAllData(user.uid);
+      if (result.success && result.data) {
+        setDeleteDataResult(result.data);
+        setSuccessMessage('כל הנתונים נמחקו בהצלחה');
+        // Redirect to login page after deletion
+        setTimeout(() => {
+          router.push('/login');
+          window.location.reload();
+        }, 1500);
+      } else {
+        setError(result.error || 'שגיאה במחיקת נתונים');
+      }
+    } catch (err: any) {
+      setError(err.message || 'שגיאה במחיקת נתונים');
+    } finally {
+      setDeletingData(false);
+    }
+  }, [user, router]);
 
   return {
     email,
@@ -112,6 +173,10 @@ export function useLoginForm() {
     insertingMockData,
     mockDataResult,
     handleInsertMockData,
+    // Delete data
+    deletingData,
+    deleteDataResult,
+    handleDeleteAllData,
     isLoggedIn: !!user,
   };
 }

@@ -3,8 +3,9 @@
  * הכנסת נתונים מדומים ל-Firestore
  */
 
-import { db, isMockMode } from '@/lib/firebase';
-import { collection, addDoc, Timestamp, doc, setDoc, writeBatch } from 'firebase/firestore';
+import { db, auth, isMockMode } from '@/lib/firebase';
+import { collection, addDoc, Timestamp, doc, setDoc, writeBatch, query, where, getDocs, deleteDoc } from 'firebase/firestore';
+import { deleteUser } from 'firebase/auth';
 import {
   generateMockCouple,
   generateMockEpics,
@@ -191,4 +192,132 @@ function chunkArray<T>(array: T[], size: number): T[][] {
     chunks.push(array.slice(i, i + size));
   }
   return chunks;
+}
+
+// ==================== DELETE ALL DATA ====================
+
+export interface DeleteDataResult {
+  tasksDeleted: number;
+  epicsDeleted: number;
+  guestsDeleted: number;
+  vendorsDeleted: number;
+  coupleDeleted: boolean;
+  userDeleted: boolean;
+}
+
+/**
+ * מחיקת כל הנתונים של המשתמש כולל המשתמש עצמו
+ */
+export async function deleteAllData(
+  userId: string
+): Promise<ServiceResult<DeleteDataResult>> {
+  try {
+    if (isMockMode) {
+      console.log('Mock mode: Would delete all data');
+      return {
+        success: true,
+        data: {
+          tasksDeleted: 0,
+          epicsDeleted: 0,
+          guestsDeleted: 0,
+          vendorsDeleted: 0,
+          coupleDeleted: true,
+          userDeleted: true,
+        },
+      };
+    }
+
+    const result: DeleteDataResult = {
+      tasksDeleted: 0,
+      epicsDeleted: 0,
+      guestsDeleted: 0,
+      vendorsDeleted: 0,
+      coupleDeleted: false,
+      userDeleted: false,
+    };
+
+    // 1. מחיקת כל המשימות
+    const tasksQuery = query(
+      collection(db, 'tasks'),
+      where('coupleId', '==', userId)
+    );
+    const tasksDocs = await getDocs(tasksQuery);
+    const taskChunks = chunkArray(tasksDocs.docs, 450);
+
+    for (const chunk of taskChunks) {
+      const batch = writeBatch(db);
+      chunk.forEach((d) => batch.delete(d.ref));
+      await batch.commit();
+      result.tasksDeleted += chunk.length;
+    }
+    console.log(`🗑️ ${result.tasksDeleted} tasks deleted`);
+
+    // 2. מחיקת כל האפיקים
+    const epicsQuery = query(
+      collection(db, 'epics'),
+      where('coupleId', '==', userId)
+    );
+    const epicsDocs = await getDocs(epicsQuery);
+    const epicChunks = chunkArray(epicsDocs.docs, 450);
+
+    for (const chunk of epicChunks) {
+      const batch = writeBatch(db);
+      chunk.forEach((d) => batch.delete(d.ref));
+      await batch.commit();
+      result.epicsDeleted += chunk.length;
+    }
+    console.log(`🗑️ ${result.epicsDeleted} epics deleted`);
+
+    // 3. מחיקת כל האורחים
+    const guestsQuery = query(
+      collection(db, 'guests'),
+      where('coupleId', '==', userId)
+    );
+    const guestsDocs = await getDocs(guestsQuery);
+    const guestChunks = chunkArray(guestsDocs.docs, 450);
+
+    for (const chunk of guestChunks) {
+      const batch = writeBatch(db);
+      chunk.forEach((d) => batch.delete(d.ref));
+      await batch.commit();
+      result.guestsDeleted += chunk.length;
+    }
+    console.log(`🗑️ ${result.guestsDeleted} guests deleted`);
+
+    // 4. מחיקת כל הספקים
+    const vendorsQuery = query(
+      collection(db, 'vendors'),
+      where('coupleId', '==', userId)
+    );
+    const vendorsDocs = await getDocs(vendorsQuery);
+    const vendorChunks = chunkArray(vendorsDocs.docs, 450);
+
+    for (const chunk of vendorChunks) {
+      const batch = writeBatch(db);
+      chunk.forEach((d) => batch.delete(d.ref));
+      await batch.commit();
+      result.vendorsDeleted += chunk.length;
+    }
+    console.log(`🗑️ ${result.vendorsDeleted} vendors deleted`);
+
+    // 5. מחיקת מסמך הזוג
+    const coupleRef = doc(db, 'couples', userId);
+    await deleteDoc(coupleRef);
+    result.coupleDeleted = true;
+    console.log('🗑️ Couple document deleted');
+
+    // 6. מחיקת המשתמש מ-Firebase Auth
+    const currentUser = auth.currentUser;
+    if (currentUser && currentUser.uid === userId) {
+      await deleteUser(currentUser);
+      result.userDeleted = true;
+      console.log('🗑️ User deleted from Firebase Auth');
+    }
+
+    console.log('🎉 All data deleted successfully:', result);
+    return { success: true, data: result };
+  } catch (error) {
+    console.error('Error deleting all data:', error);
+    return { success: false, error: (error as Error).message };
+  }
 }

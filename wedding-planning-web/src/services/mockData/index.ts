@@ -12,4 +12,9 @@ export {
   type MockDataConfig,
 } from './mockDataGenerator';
 
-export { insertMockData, type MockDataInsertResult } from './mockDataService';
+export {
+  insertMockData,
+  deleteAllData,
+  type MockDataInsertResult,
+  type DeleteDataResult,
+} from './mockDataService';
