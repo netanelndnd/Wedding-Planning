@@ -1,31 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { taskService } from '@/services/firestoreService';
+import { taskService } from '@/services/crud';
 import { Task } from '@/types';
 
 export async function POST(req: NextRequest) {
   try {
-    const { coupleId, action, task } = await req.json();
+    const body = await req.json();
+    const { coupleId, action, task, taskId, updates, status } = body;
 
     if (action === 'create') {
-      const taskId = await taskService.addTask(coupleId, task);
-      return NextResponse.json({ taskId }, { status: 201 });
+      const result = await taskService.add(coupleId, task);
+      if (!result.success) {
+        return NextResponse.json({ error: result.error }, { status: 400 });
+      }
+      return NextResponse.json({ taskId: result.data }, { status: 201 });
     }
 
     if (action === 'update') {
-      const { taskId, updates } = await req.json();
-      await taskService.updateTask(taskId, updates);
+      const result = await taskService.update(taskId, updates);
+      if (!result.success) {
+        return NextResponse.json({ error: result.error }, { status: 400 });
+      }
       return NextResponse.json({ message: 'Task updated' }, { status: 200 });
     }
 
     if (action === 'delete') {
-      const { taskId } = await req.json();
-      await taskService.deleteTask(taskId);
+      const result = await taskService.delete(taskId);
+      if (!result.success) {
+        return NextResponse.json({ error: result.error }, { status: 400 });
+      }
       return NextResponse.json({ message: 'Task deleted' }, { status: 200 });
     }
 
     if (action === 'changeStatus') {
-      const { taskId, status } = await req.json();
-      await taskService.changeTaskStatus(taskId, status);
+      const result = await taskService.changeStatus(taskId, status);
+      if (!result.success) {
+        return NextResponse.json({ error: result.error }, { status: 400 });
+      }
       return NextResponse.json({ message: 'Status changed' }, { status: 200 });
     }
 

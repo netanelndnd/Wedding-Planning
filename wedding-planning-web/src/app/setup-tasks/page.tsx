@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { epicService, taskService } from '@/services/firestoreService';
+import { epicService, taskService } from '@/services/crud';
 import { isMockMode } from '@/lib/firebase';
 import type { Priority } from '@/types';
 
@@ -55,13 +55,18 @@ export default function SetupTasksPage() {
       let epicId: string;
       try {
         console.log('Creating default epic...');
-        epicId = await epicService.addEpic(user.uid, {
+        const epicResult = await epicService.add(user.uid, {
           title: 'משימות כלליות',
           description: 'משימות חשובות לתכנון החתונה',
           category: 'general',
           color: '#ec4899',
           order: 0,
+          coupleId: user.uid,
         });
+        if (!epicResult.success || !epicResult.data) {
+          throw new Error(epicResult.error || 'שגיאה ביצירת הנושא');
+        }
+        epicId = epicResult.data;
         console.log('✅ Epic created:', epicId);
       } catch (epicErr: any) {
         console.error('Error creating epic:', epicErr);
@@ -143,9 +148,12 @@ export default function SetupTasksPage() {
       const taskPromises = defaultTasks.map(async (task, index) => {
         try {
           console.log(`Creating task ${index + 1}/${defaultTasks.length}: ${task.title}`);
-          const taskId = await taskService.addTask(user.uid, task);
-          console.log(`✅ Task ${index + 1} created: ${taskId}`);
-          return taskId;
+          const taskResult = await taskService.add(user.uid, task);
+          if (!taskResult.success || !taskResult.data) {
+            throw new Error(taskResult.error || 'שגיאה ביצירת המשימה');
+          }
+          console.log(`✅ Task ${index + 1} created: ${taskResult.data}`);
+          return taskResult.data;
         } catch (taskErr: any) {
           console.error(`Error creating task ${index + 1} (${task.title}):`, taskErr);
           throw new Error(`שגיאה ביצירת המשימה "${task.title}": ${taskErr.message || 'שגיאה לא ידועה'}`);

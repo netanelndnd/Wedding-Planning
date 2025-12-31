@@ -1,0 +1,57 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Dev Server",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}/wedding-planning-web",
+      "console": "integratedTerminal",
+      "serverReadyAction": {
+        "pattern": "- Local:.+(https?://\\S+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      }
+    },
+    {
+      "name": "Dev Server (with Emulator)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}/wedding-planning-web",
+      "console": "integratedTerminal",
+      "env": {
+        "NEXT_PUBLIC_USE_FIREBASE_EMULATOR": "true"
+      },
+      "serverReadyAction": {
+        "pattern": "- Local:.+(https?://\\S+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      }
+    },
+    {
+      "name": "Firebase Emulator",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "firebase",
+      "runtimeArgs": ["emulators:start"],
+      "cwd": "${workspaceFolder}/wedding-planning-web",
+      "console": "integratedTerminal",
+      "serverReadyAction": {
+        "pattern": "Emulator UI.+(http://\\S+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Dev + Emulator",
+      "configurations": ["Firebase Emulator", "Dev Server (with Emulator)"],
+      "stopAll": true
+    }
+  ]
+}

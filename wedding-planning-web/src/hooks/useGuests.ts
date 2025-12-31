@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { GuestData, exportGuestsToExcel, importGuestsFromExcel } from '@/utils/excelExport';
-import { guestService } from '@/services/firestoreService';
+import { guestService } from '@/services/crud';
 import { Guest } from '@/types';
 
 /**
@@ -58,7 +58,7 @@ export function useGuests() {
     }
 
     setLoading(true);
-    const unsubscribe = guestService.subscribeToGuests(user.uid, (fetchedGuests) => {
+    const unsubscribe = guestService.subscribe(user.uid, (fetchedGuests) => {
       setGuests(fetchedGuests);
       setLoading(false);
     });
@@ -98,7 +98,7 @@ export function useGuests() {
       
       // MERGE: Add new guests without deleting existing ones
       console.log('💾 Adding', firestoreGuests.length, 'guests to Firebase (merging)...');
-      await guestService.addGuestsBatch(user.uid, firestoreGuests);
+      await guestService.addBatch(user.uid, firestoreGuests.map(g => ({ ...g, coupleId: user.uid })));
       
       console.log('✅ Import complete!');
       setUploadSuccess(true);
@@ -115,11 +115,14 @@ export function useGuests() {
   // Add single guest from form data
   const addGuestFromForm = useCallback(async (guestData: Omit<Guest, 'id' | 'createdAt' | 'updatedAt' | 'coupleId'>) => {
     if (!user?.uid) return;
-    
+
     setSaving(true);
     setError('');
     try {
-      await guestService.addGuest(user.uid, guestData);
+      const result = await guestService.add(user.uid, { ...guestData, coupleId: user.uid });
+      if (!result.success) {
+        setError(result.error || 'שגיאה בהוספת אורח');
+      }
     } catch (err: any) {
       console.error('Error adding guest:', err);
       setError(err.message || 'שגיאה בהוספת אורח');
@@ -133,7 +136,10 @@ export function useGuests() {
     setSaving(true);
     setError('');
     try {
-      await guestService.updateGuest(guestId, updates);
+      const result = await guestService.update(guestId, updates);
+      if (!result.success) {
+        setError(result.error || 'שגיאה בעדכון אורח');
+      }
     } catch (err: any) {
       console.error('Error updating guest:', err);
       setError(err.message || 'שגיאה בעדכון אורח');
@@ -145,7 +151,10 @@ export function useGuests() {
   // Delete guest
   const deleteGuest = useCallback(async (guestId: string) => {
     try {
-      await guestService.deleteGuest(guestId);
+      const result = await guestService.delete(guestId);
+      if (!result.success) {
+        setError(result.error || 'שגיאה במחיקת אורח');
+      }
     } catch (err: any) {
       console.error('Error deleting guest:', err);
       setError(err.message || 'שגיאה במחיקת אורח');

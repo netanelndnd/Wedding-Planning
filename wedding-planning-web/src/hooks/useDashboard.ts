@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useVendors } from '@/hooks/useVendors';
-import { taskService } from '@/services/firestoreService';
+import { taskService } from '@/services/crud';
 import { Task } from '@/types';
 
 /**
@@ -41,7 +41,7 @@ export function useDashboard() {
     if (!user) return;
 
     setTasksLoading(true);
-    const unsubscribe = taskService.subscribeToTasks(user.uid, (newTasks) => {
+    const unsubscribe = taskService.subscribe(user.uid, (newTasks) => {
       setTasks(newTasks);
       setTasksLoading(false);
     });

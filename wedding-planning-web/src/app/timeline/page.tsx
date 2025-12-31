@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { taskService } from '@/services/firestoreService';
+import { taskService } from '@/services/crud';
 import { Task, Priority } from '@/types';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
@@ -26,7 +26,7 @@ export default function TimelinePage() {
     }
 
     if (user) {
-      const unsubscribe = taskService.subscribeToTasks(user.uid, (fetchedTasks) => {
+      const unsubscribe = taskService.subscribe(user.uid, (fetchedTasks) => {
         setTasks(fetchedTasks);
         setLoading(false);
       });

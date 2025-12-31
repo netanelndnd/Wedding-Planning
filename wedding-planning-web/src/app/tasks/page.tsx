@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { taskService, epicService } from '@/services/firestoreService';
+import { taskService, epicService } from '@/services/crud';
 import { Task, Epic, Priority, TaskStatus } from '@/types';
 import { exportTasksToExcel } from '@/utils/excelExport';
 
@@ -72,11 +72,11 @@ export default function TasksPage() {
     }
 
     if (user) {
-      const unsubscribeTasks = taskService.subscribeToTasks(user.uid, (fetchedTasks) => {
+      const unsubscribeTasks = taskService.subscribe(user.uid, (fetchedTasks) => {
         setTasks(fetchedTasks);
       });
 
-      const unsubscribeEpics = epicService.subscribeToEpics(user.uid, (fetchedEpics) => {
+      const unsubscribeEpics = epicService.subscribe(user.uid, (fetchedEpics) => {
         setEpics(fetchedEpics);
         if (fetchedEpics.length > 0 && !newTask.epicId) {
           setNewTask(prev => ({ ...prev, epicId: fetchedEpics[0].id }));
@@ -99,12 +99,15 @@ export default function TasksPage() {
       let epicIdToUse = newTask.epicId;
 
       if (!epicIdToUse && epics.length === 0) {
-        epicIdToUse = await epicService.addEpic(user.uid, {
+        const epicResult = await epicService.add(user.uid, {
           title: 'כללי',
           category: 'general',
           order: 0,
           coupleId: user.uid
         });
+        if (epicResult.success && epicResult.data) {
+          epicIdToUse = epicResult.data;
+        }
       }
 
       if (!epicIdToUse) {
@@ -112,13 +115,16 @@ export default function TasksPage() {
         return;
       }
 
-      await taskService.addTask(user.uid, {
+      const taskResult = await taskService.add(user.uid, {
         ...newTask,
         epicId: epicIdToUse,
         status: 'pending',
         coupleId: user.uid,
         dueDate: newTask.dueDate ? new Date(newTask.dueDate) : undefined,
       });
+      if (!taskResult.success) {
+        throw new Error(taskResult.error);
+      }
 
       setShowAddTaskModal(false);
       setNewTask({
@@ -140,7 +146,7 @@ export default function TasksPage() {
     if (!editingTask) return;
 
     try {
-      await taskService.updateTask(editingTask.id, {
+      const result = await taskService.update(editingTask.id, {
         title: editingTask.title,
         description: editingTask.description,
         priority: editingTask.priority,
@@ -149,6 +155,9 @@ export default function TasksPage() {
         epicId: editingTask.epicId,
         notes: editingTask.notes,
       });
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
       setShowEditTaskModal(false);
       setEditingTask(null);
@@ -168,7 +177,7 @@ export default function TasksPage() {
       } else {
         newStatus = 'completed';
       }
-      await taskService.changeTaskStatus(task.id, newStatus);
+      await taskService.changeStatus(task.id, newStatus);
     } catch (error) {
       console.error('Error updating task:', error);
     }
@@ -177,7 +186,7 @@ export default function TasksPage() {
   const handleDeleteTask = async (taskId: string) => {
     if (window.confirm('האם את/ה בטוח/ה שברצונך למחוק משימה זו?')) {
       try {
-        await taskService.deleteTask(taskId);
+        await taskService.delete(taskId);
       } catch (error) {
         console.error('Error deleting task:', error);
       }
@@ -189,11 +198,14 @@ export default function TasksPage() {
     if (!user) return;
 
     try {
-      await epicService.addEpic(user.uid, {
+      const result = await epicService.add(user.uid, {
         ...newEpic,
         order: epics.length,
         coupleId: user.uid,
       });
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
       setShowAddEpicModal(false);
       setNewEpic({
@@ -211,7 +223,7 @@ export default function TasksPage() {
   const handleDeleteEpic = async (epicId: string) => {
     if (window.confirm('האם למחוק נושא זה? כל המשימות בנושא ימחקו גם כן.')) {
       try {
-        await epicService.deleteEpic(epicId);
+        await epicService.deleteWithTasks(epicId);
       } catch (error) {
         console.error('Error deleting epic:', error);
       }

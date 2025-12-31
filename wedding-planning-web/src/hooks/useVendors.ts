@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { vendorService } from '@/services/firestoreService';
+import { vendorService } from '@/services/crud';
 import { uploadContract, deleteContract } from '@/services/storageService';
 import { Vendor } from '@/types';
 
@@ -24,7 +24,7 @@ export function useVendors() {
     }
 
     setLoading(true);
-    const unsubscribe = vendorService.subscribeToVendors(user.uid, (newVendors) => {
+    const unsubscribe = vendorService.subscribe(user.uid, (newVendors) => {
       setVendors(newVendors);
       setLoading(false);
     });
@@ -41,11 +41,15 @@ export function useVendors() {
 
     try {
       setError('');
-      const vendorId = await vendorService.addVendor(user.uid, {
+      const result = await vendorService.add(user.uid, {
         ...vendorData,
         coupleId: user.uid,
       });
-      return vendorId;
+      if (!result.success) {
+        setError(result.error || 'שגיאה בהוספת ספק');
+        throw new Error(result.error);
+      }
+      return result.data || '';
     } catch (err: any) {
       console.error('Error adding vendor:', err);
       setError(err.message || 'שגיאה בהוספת ספק');
@@ -57,7 +61,11 @@ export function useVendors() {
   const updateVendor = useCallback(async (vendorId: string, updates: Partial<Vendor>) => {
     try {
       setError('');
-      await vendorService.updateVendor(vendorId, updates);
+      const result = await vendorService.update(vendorId, updates);
+      if (!result.success) {
+        setError(result.error || 'שגיאה בעדכון ספק');
+        throw new Error(result.error);
+      }
     } catch (err: any) {
       console.error('Error updating vendor:', err);
       setError(err.message || 'שגיאה בעדכון ספק');
@@ -80,8 +88,12 @@ export function useVendors() {
           console.warn('Could not delete contract:', err);
         }
       }
-      
-      await vendorService.deleteVendor(vendorId);
+
+      const result = await vendorService.delete(vendorId);
+      if (!result.success) {
+        setError(result.error || 'שגיאה במחיקת ספק');
+        throw new Error(result.error);
+      }
     } catch (err: any) {
       console.error('Error deleting vendor:', err);
       setError(err.message || 'שגיאה במחיקת ספק');
@@ -114,7 +126,7 @@ export function useVendors() {
       const { url, fileName } = await uploadContract(user.uid, vendorId, file);
       
       // Update vendor with contract URL
-      await vendorService.updateVendor(vendorId, {
+      await vendorService.update(vendorId, {
         contractUrl: url,
         contractFileName: fileName,
       });
@@ -137,7 +149,7 @@ export function useVendors() {
     try {
       setError('');
       await deleteContract(vendor.contractUrl);
-      await vendorService.updateVendor(vendorId, {
+      await vendorService.update(vendorId, {
         contractUrl: undefined,
         contractFileName: undefined,
       });

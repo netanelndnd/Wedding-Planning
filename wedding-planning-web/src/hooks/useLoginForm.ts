@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { insertMockData, MockDataInsertResult } from '@/services/mockData';
 
 /**
  * useLoginForm Hook
@@ -16,9 +17,11 @@ export function useLoginForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [insertingMockData, setInsertingMockData] = useState(false);
+  const [mockDataResult, setMockDataResult] = useState<MockDataInsertResult | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isMockMode, mockLogin } = useAuth();
+  const { isMockMode, mockLogin, user } = useAuth();
 
   // Check if user just registered
   useEffect(() => {
@@ -63,6 +66,38 @@ export function useLoginForm() {
     }
   }, [email, password, isMockMode, mockLogin, router]);
 
+  // Insert mock data handler
+  const handleInsertMockData = useCallback(async () => {
+    if (!user?.uid) {
+      setError('יש להתחבר תחילה כדי להכניס נתוני דוגמה');
+      return;
+    }
+
+    setInsertingMockData(true);
+    setError('');
+    setMockDataResult(null);
+
+    try {
+      const result = await insertMockData(user.uid, {
+        guestCount: 50,
+        vendorCount: 8,
+        taskCount: 12,
+        epicCount: 4,
+      });
+
+      if (result.success && result.data) {
+        setMockDataResult(result.data);
+        setSuccessMessage(`נתוני דוגמה הוכנסו בהצלחה! ${result.data.guestsInserted} אורחים, ${result.data.vendorsInserted} ספקים, ${result.data.tasksInserted} משימות`);
+      } else {
+        setError(result.error || 'שגיאה בהכנסת נתוני דוגמה');
+      }
+    } catch (err: any) {
+      setError(err.message || 'שגיאה בהכנסת נתוני דוגמה');
+    } finally {
+      setInsertingMockData(false);
+    }
+  }, [user]);
+
   return {
     email,
     setEmail,
@@ -73,6 +108,11 @@ export function useLoginForm() {
     successMessage,
     handleLogin,
     isMockMode,
+    // Mock data
+    insertingMockData,
+    mockDataResult,
+    handleInsertMockData,
+    isLoggedIn: !!user,
   };
 }
 
