@@ -18,6 +18,16 @@
 - משתמש אחד לזוג
 - Toggle חתן/כלה בראש המסך
 
+### סביבת פיתוח
+- **פורט**: 3000
+- **Firebase Emulator**:
+  - במצב development → מחובר לאמולטור
+  - פלאג `USE_FIREBASE_CLOUD=true` → מחובר לשרת בענן
+- **דשבורד פיתוח** (בדף Login):
+  - איפוס בסיס נתונים (מחיקת כל הנתונים)
+  - טעינת מידע מזוייף (Seed Data)
+  - אימייל וסיסמה של משתמש בדיקה עם כפתור העתקה
+
 ---
 
 ## איך כל ספרייה תמומש (הסבר פשוט)
@@ -372,11 +382,14 @@ wedding-planning-web/
 │   │   │   ├── Input.tsx
 │   │   │   ├── Modal.tsx
 │   │   │   ├── Card.tsx
+│   │   │   ├── CopyButton.tsx   # כפתור העתקה
 │   │   │   └── ...
 │   │   ├── layout/              # קומפוננטות מבנה
 │   │   │   ├── Header.tsx
 │   │   │   ├── Sidebar.tsx
 │   │   │   └── PartnerToggle.tsx
+│   │   ├── dev/                 # כלי פיתוח (רק ב-dev)
+│   │   │   └── DevDashboard.tsx # פאנל בדף Login
 │   │   ├── dashboard/
 │   │   ├── tasks/
 │   │   └── guests/
@@ -396,6 +409,9 @@ wedding-planning-web/
 │   │   │   ├── taskService.ts
 │   │   │   ├── guestService.ts
 │   │   │   └── index.ts
+│   │   ├── dev/                 # כלי פיתוח (רק ב-dev)
+│   │   │   ├── seedService.ts   # מידע מזוייף
+│   │   │   └── resetService.ts  # איפוס DB
 │   │   └── index.ts             # ייצוא מרכזי
 │   │
 │   ├── hooks/                   # Custom Hooks
@@ -565,6 +581,305 @@ export interface Guest {
 7. `src/hooks/useAuth.ts` - Hook אימות
 8. `src/hooks/usePartner.ts` - Hook toggle חתן/כלה
 9. `firestore.rules` - כללי אבטחה
+10. `src/services/dev/seedService.ts` - מידע מזוייף
+11. `src/components/dev/DevDashboard.tsx` - דשבורד פיתוח
+
+---
+
+## Firebase Emulator & Dev Dashboard
+
+### הגדרת Firebase עם Emulator
+```typescript
+// src/lib/firebase.ts
+import { initializeApp } from 'firebase/app';
+import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+
+const firebaseConfig = { /* ... */ };
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// חיבור לאמולטור במצב פיתוח
+const isDev = process.env.NODE_ENV === 'development';
+const useCloud = process.env.NEXT_PUBLIC_USE_FIREBASE_CLOUD === 'true';
+
+if (isDev && !useCloud) {
+  connectAuthEmulator(auth, 'http://localhost:9099');
+  connectFirestoreEmulator(db, 'localhost', 8080);
+}
+
+export { app, auth, db };
+```
+
+### קובץ .env.local
+```env
+# Firebase Config
+NEXT_PUBLIC_FIREBASE_API_KEY=xxx
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=xxx
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=xxx
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=xxx
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=xxx
+NEXT_PUBLIC_FIREBASE_APP_ID=xxx
+
+# Dev Settings
+NEXT_PUBLIC_USE_FIREBASE_CLOUD=false  # true = ענן, false = אמולטור
+```
+
+### משתמש בדיקה
+```typescript
+// src/lib/constants.ts
+export const DEV_USER = {
+  email: 'test@wedding.dev',
+  password: 'Test123!'
+};
+```
+
+### Seed Service - מידע מזוייף
+```typescript
+// src/services/dev/seedService.ts
+import { db, auth } from '@/lib/firebase';
+import { collection, doc, setDoc, writeBatch } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { DEV_USER } from '@/lib/constants';
+
+export const seedService = {
+  // יצירת משתמש בדיקה
+  async createTestUser() {
+    const { user } = await createUserWithEmailAndPassword(
+      auth, DEV_USER.email, DEV_USER.password
+    );
+    return user;
+  },
+
+  // יצירת זוג עם נתונים מלאים
+  async seedCouple(userId: string) {
+    const coupleRef = doc(db, 'couples', userId);
+    await setDoc(coupleRef, {
+      partner1Name: 'דוד',
+      partner2Name: 'שרה',
+      weddingDate: new Date('2025-06-15'),
+      targetBudget: 150000,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+    return userId;
+  },
+
+  // יצירת קטגוריות ברירת מחדל
+  async seedEpics(coupleId: string) {
+    const batch = writeBatch(db);
+    const epics = [
+      { title: 'צילום ווידאו', icon: '📸', color: '#3B82F6', order: 1 },
+      { title: 'קייטרינג', icon: '🍽️', color: '#EF4444', order: 2 },
+      { title: 'אולם/מקום', icon: '🏛️', color: '#8B5CF6', order: 3 },
+      // ...
+    ];
+
+    epics.forEach(epic => {
+      const ref = doc(collection(db, 'couples', coupleId, 'epics'));
+      batch.set(ref, { ...epic, isDefault: true, createdAt: new Date() });
+    });
+
+    await batch.commit();
+  },
+
+  // יצירת משימות לדוגמה
+  async seedTasks(coupleId: string, epicIds: string[]) {
+    const batch = writeBatch(db);
+    const tasks = [
+      { title: 'לבחור צלם', epicId: epicIds[0], status: 'completed' },
+      { title: 'לסגור תאריך עם הצלם', epicId: epicIds[0], status: 'in-progress' },
+      { title: 'טעימות אצל הקייטרינג', epicId: epicIds[1], status: 'pending' },
+      // ...
+    ];
+
+    tasks.forEach(task => {
+      const ref = doc(collection(db, 'couples', coupleId, 'tasks'));
+      batch.set(ref, {
+        ...task,
+        assignedTo: 'both',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+    });
+
+    await batch.commit();
+  },
+
+  // Seed מלא
+  async seedAll() {
+    const user = await this.createTestUser();
+    await this.seedCouple(user.uid);
+    await this.seedEpics(user.uid);
+    // ...
+  }
+};
+```
+
+### Reset Service - איפוס DB
+```typescript
+// src/services/dev/resetService.ts
+import { db } from '@/lib/firebase';
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+
+export const resetService = {
+  // מחיקת כל המסמכים באוסף
+  async clearCollection(path: string) {
+    const snapshot = await getDocs(collection(db, path));
+    const promises = snapshot.docs.map(d => deleteDoc(doc(db, path, d.id)));
+    await Promise.all(promises);
+  },
+
+  // מחיקת כל הנתונים של זוג
+  async clearCoupleData(coupleId: string) {
+    await this.clearCollection(`couples/${coupleId}/tasks`);
+    await this.clearCollection(`couples/${coupleId}/epics`);
+    await this.clearCollection(`couples/${coupleId}/guests`);
+    await deleteDoc(doc(db, 'couples', coupleId));
+  },
+
+  // איפוס מלא של כל ה-DB
+  async resetAll() {
+    const couples = await getDocs(collection(db, 'couples'));
+    for (const couple of couples.docs) {
+      await this.clearCoupleData(couple.id);
+    }
+  }
+};
+```
+
+### Dev Dashboard Component
+```tsx
+// src/components/dev/DevDashboard.tsx
+'use client';
+
+import { useState } from 'react';
+import { seedService } from '@/services/dev/seedService';
+import { resetService } from '@/services/dev/resetService';
+import { DEV_USER } from '@/lib/constants';
+import { CopyButton } from '@/components/ui/CopyButton';
+
+export function DevDashboard() {
+  const [loading, setLoading] = useState(false);
+  const isDev = process.env.NODE_ENV === 'development';
+
+  if (!isDev) return null;
+
+  const handleReset = async () => {
+    if (!confirm('למחוק את כל הנתונים?')) return;
+    setLoading(true);
+    await resetService.resetAll();
+    setLoading(false);
+  };
+
+  const handleSeed = async () => {
+    setLoading(true);
+    await seedService.seedAll();
+    setLoading(false);
+  };
+
+  return (
+    <div className="p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
+      <h3 className="font-bold mb-4">🛠️ Dev Dashboard</h3>
+
+      {/* פרטי משתמש בדיקה */}
+      <div className="mb-4 space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-sm">אימייל:</span>
+          <code className="bg-gray-100 px-2 py-1 rounded">{DEV_USER.email}</code>
+          <CopyButton text={DEV_USER.email} />
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm">סיסמה:</span>
+          <code className="bg-gray-100 px-2 py-1 rounded">{DEV_USER.password}</code>
+          <CopyButton text={DEV_USER.password} />
+        </div>
+      </div>
+
+      {/* כפתורי פעולה */}
+      <div className="flex gap-2">
+        <button
+          onClick={handleReset}
+          disabled={loading}
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        >
+          🗑️ איפוס DB
+        </button>
+        <button
+          onClick={handleSeed}
+          disabled={loading}
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+        >
+          📦 טעינת נתונים
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+### CopyButton Component
+```tsx
+// src/components/ui/CopyButton.tsx
+'use client';
+
+import { useState } from 'react';
+
+export function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="p-1 hover:bg-gray-200 rounded"
+      title="העתק"
+    >
+      {copied ? '✅' : '📋'}
+    </button>
+  );
+}
+```
+
+### שימוש בדף Login
+```tsx
+// src/app/(auth)/login/page.tsx
+import { DevDashboard } from '@/components/dev/DevDashboard';
+
+export default function LoginPage() {
+  return (
+    <div className="flex gap-8">
+      {/* טופס התחברות */}
+      <div className="flex-1">
+        {/* ... */}
+      </div>
+
+      {/* דשבורד פיתוח - רק ב-dev */}
+      <DevDashboard />
+    </div>
+  );
+}
+```
+
+### הפעלת האמולטור
+```bash
+# התקנת Firebase CLI (פעם אחת)
+npm install -g firebase-tools
+
+# התחברות
+firebase login
+
+# הפעלת אמולטור
+firebase emulators:start
+
+# UI של האמולטור: http://localhost:4000
+```
 
 ---
 
