@@ -5,7 +5,9 @@
       "Bash(findstr:*)",
       "Bash(tasklist:*)",
       "Bash(firebase emulators:start:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "WebSearch",
+      "Bash(claude mcp list:*)"
     ]
   }
 }
