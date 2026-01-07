@@ -1,0 +1,50 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Couples collection
+    // Document ID is the user's UID, so we allow access if coupleId matches auth.uid
+    match /couples/{coupleId} {
+      allow read: if isAuthenticated() && coupleId == request.auth.uid;
+
+      allow create: if isAuthenticated() && coupleId == request.auth.uid;
+
+      allow update: if isAuthenticated() && coupleId == request.auth.uid;
+
+      allow delete: if isAuthenticated() && coupleId == request.auth.uid;
+    }
+
+    // Epics (Categories) collection
+    match /couples/{coupleId}/epics/{epicId} {
+      allow read, write: if isAuthenticated() && coupleId == request.auth.uid;
+    }
+
+    // Tasks collection
+    match /couples/{coupleId}/tasks/{taskId} {
+      allow read, write: if isAuthenticated() && coupleId == request.auth.uid;
+    }
+
+    // Guests collection - special rules for public registration
+    match /couples/{coupleId}/guests/{guestId} {
+      // Allow public read and create (for guest self-registration)
+      allow read, create: if true;
+
+      // Only couple can update/delete
+      allow update, delete: if isAuthenticated() && coupleId == request.auth.uid;
+    }
+
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

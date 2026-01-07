@@ -12,7 +12,16 @@
       "Bash(npm install:*)",
       "Bash(where:*)",
       "Bash(powershell -ExecutionPolicy Bypass -File:*)",
-      "Bash(gh repo view:*)"
+      "Bash(gh repo view:*)",
+      "Bash(test:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run lint)",
+      "Bash(tree:*)",
+      "Bash(npx tsc:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(dir:*)",
+      "Bash(npm run build:*)"
     ]
   },
   "enabledPlugins": {

@@ -7,7 +7,7 @@
       "request": "launch",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "cwd": "${workspaceFolder}/wedding-planning-web",
+      "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "serverReadyAction": {
         "pattern": "- Local:.+(https?://\\S+)",
@@ -21,7 +21,7 @@
       "request": "launch",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "cwd": "${workspaceFolder}/wedding-planning-web",
+      "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "env": {
         "NEXT_PUBLIC_USE_FIREBASE_EMULATOR": "true"
@@ -38,7 +38,7 @@
       "request": "launch",
       "runtimeExecutable": "firebase",
       "runtimeArgs": ["emulators:start"],
-      "cwd": "${workspaceFolder}/wedding-planning-web",
+      "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "serverReadyAction": {
         "pattern": "Emulator UI.+(http://\\S+)",
