@@ -1,46 +1,161 @@
-# Wedding Planning MVP Constitution
+<!--
+=== דוח השפעת סנכרון ===
+שינוי גרסה: 0.0.0 → 1.0.0
+עקרונות חדשים:
+  - א. ארכיטקטורת שכבות (Services-First)
+  - ב. RTL-First ועיצוב נגיש
+  - ג. Firebase כבסיס
+  - ד. TypeScript קפדני
+  - ה. פשטות ו-MVP
+  - ו. לוגים מינימליים ומשמעותיים
+סעיפים חדשים:
+  - מגבלות טכניות
+  - תהליך פיתוח
+תבניות לעדכון: ✅ אין צורך בעדכון (תבניות גנריות)
+TODOs: אין
+-->
 
-## Core Principles
+<div dir="rtl">
 
-### א. Services-First Architecture
-- All business logic MUST go through service layer
-- UI components MUST NOT access Firebase directly
-- Services MUST have interfaces defined in `services/interfaces/`
-- Custom hooks in `hooks/` connect UI to services
+# חוקת פרויקט תכנון חתונה
 
-### ב. RTL-First & Accessible Design
-- Hebrew is the primary language (lang="he" dir="rtl")
-- MUST use logical CSS properties only: ms-, me-, ps-, pe-, start-, end-
-- MUST NOT use physical properties: ml-, mr-, pl-, pr-, left-, right-
-- WCAG 2.1 compliance required
+## עקרונות ליבה
 
-### ג. Firebase as Foundation
-- Firebase v11+ modular SDK
-- Firebase Emulator for development (default)
-- Firestore for data persistence
-- Firebase Auth for authentication
+### א. ארכיטקטורת שכבות (Services-First)
 
-### ד. Strict TypeScript
-- TypeScript strict mode enabled
-- No `any` types allowed
-- All types centralized in `src/types/index.ts`
-- Use `Timestamp` from Firebase for dates
+כל הלוגיקה העסקית חייבת לעבור דרך שכבת ה-Services:
 
-### ה. Simplicity & MVP
-- Start simple, YAGNI principles
-- No vendor management in MVP
-- No Excel import in MVP
-- Minimal required fields in forms
+- **ממשקים (Interfaces)**: כל Service חייב להגדיר ממשק ברור ב-`services/interfaces/`
+- **הפרדה מלאה**: קומפוננטות UI אסור להן לגשת ישירות ל-Firebase - רק דרך Services
+- **Hooks כשכבת ביניים**: Custom Hooks ב-`hooks/` מחברים בין UI ל-Services
+- **בדיקתיות**: כל Service חייב להיות ניתן לבדיקה עצמאית
 
-### ו. Minimal Meaningful Logs
-- Use centralized logger from `lib/logger.ts`
-- Log at: CRUD operations, auth events, errors only
-- Levels: ERROR, WARN, INFO, DEBUG (DEBUG dev only)
-- Always include context: `{ coupleId, taskId }`
+**סיבה**: הפרדה זו מאפשרת החלפת מימוש (למשל: Mock לפיתוח, Firebase לייצור) ללא שינוי ב-UI.
 
-## Governance
+### ב. RTL-First ועיצוב נגיש
 
-Constitution principles are NON-NEGOTIABLE during implementation.
-Amendments require explicit user approval and documentation update.
+העיצוב חייב לתמוך בעברית ובנגישות מהיום הראשון:
 
-**Version**: 1.0.0 | **Ratified**: 2026-01-07
+- **Logical Properties בלבד**: חובה להשתמש ב-`ms-`, `me-`, `ps-`, `pe-`, `start-`, `end-` במקום `ml-`, `mr-`, `pl-`, `pr-`, `left-`, `right-`
+- **כיוון מסמך**: `dir="rtl"` ו-`lang="he"` בקובץ `layout.tsx` הראשי
+- **נגישות WCAG 2.1**: ניגודיות מספקת, תוויות ARIA, אזורי לחיצה מינימום 44px
+- **עקרונות Don Norman**: Affordances, Signifiers, Feedback, Constraints חייבים להיות מיושמים
+
+**סיבה**: תיקון RTL בדיעבד יקר ומסובך. עיצוב נגיש מבטיח שימושיות לכולם.
+
+### ג. Firebase כבסיס
+
+Firebase הוא הפתרון היחיד לאחסון ואימות:
+
+- **Firebase v11+ Modular SDK**: שימוש בלבד בפונקציות מודולריות (`getAuth`, `getFirestore`, וכו')
+- **react-firebase-hooks v5+**: לניהול state בקומפוננטות
+- **אמולטור בפיתוח**: ברירת מחדל לאמולטור; דגל `NEXT_PUBLIC_USE_FIREBASE_CLOUD=true` לענן
+- **מבנה נתונים קבוע**: Collections: `couples/{coupleId}/epics`, `couples/{coupleId}/tasks`, `couples/{coupleId}/guests`
+
+**סיבה**: עקביות בטכנולוגיה מפחיתה מורכבות ומאפשרת real-time updates.
+
+### ד. TypeScript קפדני
+
+כל הקוד חייב להיות ב-TypeScript עם הגדרות טיפוסים מלאות:
+
+- **Types מרוכזים**: כל הטיפוסים ב-`types/index.ts`
+- **אין `any`**: שימוש ב-`any` אסור; יש להגדיר טיפוס מדויק או `unknown`
+- **Strict mode**: `strict: true` ב-`tsconfig.json`
+- **טיפוסי Firebase**: שימוש ב-`Timestamp` במקום `Date` בנתונים מ-Firestore
+
+**סיבה**: טיפוסים מונעים באגים בזמן פיתוח ומשפרים תחזוקתיות.
+
+### ה. פשטות ו-MVP
+
+המוצר חייב להתמקד בערך מיידי:
+
+- **YAGNI**: לא לבנות תכונות שלא נדרשו במפורש ב-MVP
+- **לא ב-MVP**: ניהול ספקים מתקדם, ייבוא אקסל, גרפים מורכבים
+- **Mobile-First**: עיצוב responsive שמתחיל ממובייל
+- **הנזק הקטן ביותר**: כל החלטה טכנית חייבת להעדיף את הפתרון הפשוט ביותר
+
+**סיבה**: משאבים מוגבלים; מיקוד ב-MVP מבטיח delivery.
+
+### ו. לוגים מינימליים ומשמעותיים
+
+לוגים רק בנקודות קריטיות:
+
+- **רמות**: ERROR (שגיאות קריטיות), WARN (אזהרות), INFO (פעולות משמעותיות), DEBUG (רק בפיתוח)
+- **היכן כן**: פעולות CRUD, אימות (התחברות/התנתקות/הרשמה), שגיאות
+- **היכן לא**: בתוך לולאות, בכל רנדור, מידע רגיש (סיסמאות, טוקנים)
+- **Context חובה**: כל לוג חייב לכלול `userId` או `coupleId` כאשר רלוונטי
+
+**סיבה**: לוגים מופרזים מסתירים בעיות אמיתיות ומשפיעים על ביצועים.
+
+## מגבלות טכניות
+
+### ערימת הטכנולוגיות (לא סחירה)
+
+| ספרייה | גרסה | תפקיד |
+|--------|------|-------|
+| Next.js | 15+ | Framework עם App Router |
+| Tailwind CSS | 4 | עיצוב עם תמיכה ב-RTL |
+| Firebase | 11+ | Auth + Firestore |
+| react-firebase-hooks | 5.1+ | Hooks ל-Firebase |
+| TypeScript | 5+ | Type Safety |
+
+### מבנה תיקיות (קבוע)
+
+```
+src/
+├── app/           # Next.js App Router - דפים וניתוב
+├── components/    # קומפוננטות UI (כולל dev/ לפיתוח בלבד)
+├── services/      # לוגיקה עסקית (interfaces/, crud/)
+├── hooks/         # Custom Hooks
+├── types/         # TypeScript Types
+├── lib/           # הגדרות (firebase.ts, logger.ts, constants.ts)
+└── utils/         # פונקציות עזר
+```
+
+### סביבת פיתוח
+
+- **פורט**: 3000
+- **אמולטור Firebase**: ברירת מחדל בפיתוח
+- **משתמש בדיקה**: `test@wedding.dev` / `Test123!`
+- **Dev Dashboard**: בדף Login - איפוס DB וטעינת נתונים מזויפים
+
+## תהליך פיתוח
+
+### Server vs Client Components
+
+- **Server Components** (ברירת מחדל): לטעינת נתונים ו-SEO
+- **Client Components** (`'use client'`): לאינטראקציה, hooks, ו-state
+
+### שכבת ה-Services
+
+1. הגדרת ממשק ב-`services/interfaces/I[Entity]Service.ts`
+2. מימוש ב-`services/crud/[entity]Service.ts`
+3. ייצוא מ-`services/index.ts`
+4. שימוש ב-Hook מתאים ב-`hooks/use[Entity].ts`
+
+### טיפול בשגיאות
+
+- כל פעולה אסינכרונית חייבת לכלול try/catch
+- שגיאות נשלחות ללוגר ומוצגות למשתמש בצורה ידידותית
+- אישור לפני פעולות הרסניות (מחיקה)
+
+## ממשל
+
+חוקה זו עדיפה על כל פרקטיקה אחרת בפרויקט. עקרונות החוקה הם **בלתי ניתנים למשא ומתן** במהלך המימוש.
+
+### תהליך תיקון
+
+1. **תיעוד**: כל שינוי חייב להיות מתועד עם סיבה
+2. **אישור**: שינויים דורשים אישור מפורש מהמשתמש
+3. **גרסאות**: MAJOR לשינויים שוברים, MINOR להוספות, PATCH לתיקונים
+4. **סנכרון**: עדכון תבניות רלוונטיות אחרי כל שינוי
+
+### ציות
+
+- כל קוד חייב לעמוד בעקרונות הליבה
+- סטייה מהחוקה מותרת רק עם תיעוד מפורש והצדקה
+- בדיקת ציות בכל Code Review
+
+**גרסה**: 1.0.0 | **אושרה**: 2026-01-07 | **עודכנה לאחרונה**: 2026-01-07
+
+</div>

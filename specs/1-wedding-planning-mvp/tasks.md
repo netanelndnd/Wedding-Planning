@@ -86,6 +86,9 @@
 - [ ] T031 [US1] Create usePartner hook for toggle state in src/hooks/usePartner.ts
 - [ ] T032 [US1] Create protected dashboard layout with auth guard redirect in src/app/(dashboard)/layout.tsx
 
+#### Settings Page
+- [ ] T032B [US1] Create settings page with profile update form (names, date, budget) in src/app/(dashboard)/settings/page.tsx
+
 #### Dev Dashboard
 - [ ] T033 [P] [US1] Create DevDashboard component (test credentials, DB reset) in src/components/dev/DevDashboard.tsx
 - [ ] T034 [P] [US1] Create mock data service for seeding in src/services/dev/mockDataService.ts
@@ -104,8 +107,9 @@
 - [ ] FR-007: Set wedding date
 - [ ] FR-008: Set target budget
 - [ ] FR-009: Partner toggle in header
+- [ ] FR-030: Update profile on settings page
 
-**Checkpoint**: User Story 1 fully functional - users can register, verify, login, setup profile
+**Checkpoint**: User Story 1 fully functional - users can register, verify, login, setup profile, update settings
 
 ---
 
@@ -333,6 +337,7 @@
 - Hooks before components
 - Core components before pages
 - All [P] marked tasks can run in parallel within their phase
+- T072 (US6) and T078 (US5) depend on T032B (settings page creation)
 
 ### Parallel Opportunities
 
@@ -416,14 +421,14 @@ T079-T084, T087-T089 can all run in parallel
 |-------|-------|------------|----------------------|
 | Phase 1 | Setup | 6 | 5 tasks |
 | Phase 2 | Foundational | 12 | 9 tasks |
-| Phase 3 | US1 (Auth) | 18 | 6 tasks |
+| Phase 3 | US1 (Auth) | 19 | 7 tasks |
 | Phase 4 | US2 (Tasks) | 12 | 5 tasks |
 | Phase 5 | US3 (Dashboard) | 8 | 5 tasks |
 | Phase 6 | US4 (Guests) | 9 | 4 tasks |
 | Phase 7 | US6 (Sharing) | 7 | 4 tasks |
 | Phase 8 | US5 (Reminders) | 6 | 2 tasks |
 | Phase 9 | Polish | 12 | 9 tasks |
-| **Total** | | **90** | |
+| **Total** | | **91** | |
 
 ---
 

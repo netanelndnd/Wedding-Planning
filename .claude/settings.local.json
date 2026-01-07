@@ -11,7 +11,8 @@
       "WebFetch(domain:www.aifreeapi.com)",
       "Bash(npm install:*)",
       "Bash(where:*)",
-      "Bash(powershell -ExecutionPolicy Bypass -File:*)"
+      "Bash(powershell -ExecutionPolicy Bypass -File:*)",
+      "Bash(gh repo view:*)"
     ]
   },
   "enabledPlugins": {
