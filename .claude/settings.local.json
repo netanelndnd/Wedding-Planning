@@ -7,7 +7,14 @@
       "Bash(firebase emulators:start:*)",
       "Bash(taskkill:*)",
       "WebSearch",
-      "Bash(claude mcp list:*)"
+      "Bash(claude mcp list:*)",
+      "WebFetch(domain:www.aifreeapi.com)",
+      "Bash(npm install:*)",
+      "Bash(where:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File:*)"
     ]
+  },
+  "enabledPlugins": {
+    "vtsls@claude-code-lsps": true
   }
 }
