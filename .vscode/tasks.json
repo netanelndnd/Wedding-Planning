@@ -2,19 +2,58 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Check Emulators",
+      "label": "Dev Server",
       "type": "shell",
-      "command": "echo",
-      "args": ["Checking Firebase Emulators..."],
+      "command": "npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/wedding-planning-web"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(.*)$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting...",
+          "endsPattern": "Ready"
+        }
+      },
       "presentation": {
-        "echo": true,
-        "reveal": "silent",
-        "focus": false,
-        "panel": "shared"
+        "reveal": "always",
+        "panel": "new"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
       }
     },
     {
-      "label": "Claude (mintty externalַ, RTL)",
+      "label": "Build",
+      "type": "shell",
+      "command": "npm run build",
+      "options": {
+        "cwd": "${workspaceFolder}/wedding-planning-web"
+      },
+      "problemMatcher": ["$tsc"],
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "Lint",
+      "type": "shell",
+      "command": "npm run lint",
+      "options": {
+        "cwd": "${workspaceFolder}/wedding-planning-web"
+      },
+      "problemMatcher": ["$eslint-stylish"],
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "Claude (mintty external, RTL)",
       "type": "process",
       "command": "C:\\Program Files\\Git\\usr\\bin\\mintty.exe",
       "args": [
@@ -22,18 +61,6 @@
         "/usr/bin/bash",
         "-lc",
         "exec claude"
-      ],
-      "problemMatcher": []
-    },
-    {
-      "label": "OpenAI Codex (mintty external, RTL)",
-      "type": "process",
-      "command": "C:\\Program Files\\Git\\usr\\bin\\mintty.exe",
-      "args": [
-        "--title", "codex",
-        "/usr/bin/bash",
-        "-lc",
-        "exec Codex"
       ],
       "problemMatcher": []
     }

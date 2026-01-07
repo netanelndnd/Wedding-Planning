@@ -2,59 +2,56 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "🌐 פיתוח על Chrome - Debug Console",
+      "name": "Dev Server",
+      "type": "node",
       "request": "launch",
-      "type": "dart",
-      "program": "lib/main.dart",
-      "toolArgs": [
-        "-d",
-        "chrome",
-        "--web-port=8080"
-      ],
-      "args": ["--dart-define=ENV=local"],
-      "console": "debugConsole"
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}/wedding-planning-web",
+      "console": "integratedTerminal",
+      "serverReadyAction": {
+        "pattern": "- Local:.+(https?://\\S+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      }
     },
     {
-      "name": "📋 פיתוח על Chrome - Terminal (ניתן להעתיק)",
+      "name": "Dev Server (with Emulator)",
+      "type": "node",
       "request": "launch",
-      "type": "dart",
-      "program": "lib/main.dart",
-      "toolArgs": [
-        "-d",
-        "chrome",
-        "--web-port=8080"
-      ],
-      "args": ["--dart-define=ENV=local"],
-      "console": "terminal"
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}/wedding-planning-web",
+      "console": "integratedTerminal",
+      "env": {
+        "NEXT_PUBLIC_USE_FIREBASE_EMULATOR": "true"
+      },
+      "serverReadyAction": {
+        "pattern": "- Local:.+(https?://\\S+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      }
     },
     {
-      "name": "🔌 התחבר לדיבאגר (הזן URL)",
-      "request": "attach",
-      "type": "dart",
-      "vmServiceUri": "${command:dart.promptForVmService}"
-    },
-    {
-      "name": "🌐 בדיקות בענן",
+      "name": "Firebase Emulator",
+      "type": "node",
       "request": "launch",
-      "type": "dart",
-      "program": "lib/main.dart",
-      "args": ["--dart-define=ENV=testing"],
-      "console": "debugConsole"
-    },
+      "runtimeExecutable": "firebase",
+      "runtimeArgs": ["emulators:start"],
+      "cwd": "${workspaceFolder}/wedding-planning-web",
+      "console": "integratedTerminal",
+      "serverReadyAction": {
+        "pattern": "Emulator UI.+(http://\\S+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      }
+    }
+  ],
+  "compounds": [
     {
-      "name": "🚀 ייצור",
-      "request": "launch",
-      "type": "dart",
-      "program": "lib/main.dart",
-      "args": ["--dart-define=ENV=production"],
-      "console": "debugConsole"
-    },
-    {
-      "name": "🧪 בדיקות יחידה",
-      "request": "launch",
-      "type": "dart",
-      "program": "test/",
-      "args": ["--dart-define=ENV=local"]
+      "name": "Dev + Emulator",
+      "configurations": ["Firebase Emulator", "Dev Server (with Emulator)"],
+      "stopAll": true
     }
   ]
 }
